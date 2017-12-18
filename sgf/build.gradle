@@ -32,6 +32,6 @@ publish {
     groupId = 'cn.ezandroid' // jcenter上的路径
     artifactId = 'SGF' // 项目名称
     publishVersion = rootProject.ext.sdkVersionName // 版本号
-    desc = '一款加载速度快，内存占用小的sgf棋谱文件解析和生成器' // 描述
+    desc = 'A fast speed and small memory SGF file parser and generator.(一个速度快，内存占用小的SGF文件解析和生成器)' // 描述
     website = 'https://github.com/uestccokey/SGF'// 网站
 }
