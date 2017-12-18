@@ -8,9 +8,9 @@ import java.util.Vector;
 public class SGFTree {
 
     private static final String TAG = "SGFTree";
-    protected TreeNode mHistory;
-    private final int mMaxbuffer = 4096;
-    private char[] mBuffer = new char[mMaxbuffer];
+    private TreeNode mHistory;
+    private final int mMaxBuffer = 4096;
+    private char[] mBuffer = new char[mMaxBuffer];
     private int mBufferN;
     private static int mLastnl = 0;
 
@@ -20,8 +20,8 @@ public class SGFTree {
     }
 
     public static Vector<SGFTree> load(BufferedReader in) throws IOException {
-        Vector<SGFTree> v = new Vector<SGFTree>();
-        boolean linestart = true;
+        Vector<SGFTree> v = new Vector<>();
+        boolean lineStart = true;
         int c;
         reading:
         while (true) {
@@ -32,13 +32,13 @@ public class SGFTree {
                 } catch (IOException ex) {
                     break reading;
                 }
-                if (linestart && c == '(') {
+                if (lineStart && c == '(') {
                     break;
                 }
                 if (c == '\n') {
-                    linestart = true;
+                    lineStart = true;
                 } else {
-                    linestart = false;
+                    lineStart = false;
                 }
             }
             T.readNodes(T.mHistory, in);
@@ -196,7 +196,7 @@ public class SGFTree {
             mBuffer[mBufferN] = c;
             mBufferN++;
         } catch (ArrayIndexOutOfBoundsException e) {
-            int newLength = mBuffer.length + mMaxbuffer;
+            int newLength = mBuffer.length + mMaxBuffer;
             char[] newBuffer = new char[newLength];
             System.arraycopy(mBuffer, 0, newBuffer, 0, mBuffer.length);
             mBuffer = newBuffer;
