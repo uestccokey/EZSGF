@@ -9,9 +9,9 @@ A fast speed and small memory SGF file parser and generator.
 #### Gradle
 ``` gradle
 dependencies {
-    compile 'cn.ezandroid:SGF:1.0.0' // Gradle version < 3.0
+    compile 'cn.ezandroid:SGF:2.0.0' // Gradle version < 3.0
     // or
-    implementation 'cn.ezandroid:SGF:1.0.0' // Gradle version >= 3.0
+    implementation 'cn.ezandroid:SGF:2.0.0' // Gradle version >= 3.0
 }
 ```
 

@@ -4,14 +4,15 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Vector;
 
-import cn.ezandroid.sgf.SGFTree;
+import cn.ezandroid.sgf.SGFException;
+import cn.ezandroid.sgf.SGFGame;
+import cn.ezandroid.sgf.SGFLoader;
 
 public class MainActivity extends AppCompatActivity {
+
+    private long mSGFLoadTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,30 +21,29 @@ public class MainActivity extends AppCompatActivity {
 
         new Thread() {
             public void run() {
-                loadRawSGF(R.raw.simple);
-                loadRawSGF(R.raw.complex);
-                loadRawSGF(R.raw.alphago_opening_book);
+                int n = 1;
+                for (int i = 0; i < n; i++) {
+//                    loadRawSGF(R.raw.simple);
+//                    loadRawSGF(R.raw.normal);
+//                    loadRawSGF(R.raw.normal2);
+//                    loadRawSGF(R.raw.complex);
+                    loadRawSGF(R.raw.alphago_opening_book);
+                }
             }
         }.start();
     }
 
     private void loadRawSGF(int id) {
-        BufferedReader reader = null;
+        SGFLoader loader = new SGFLoader();
         try {
             long time = System.currentTimeMillis();
-            reader = new BufferedReader(new InputStreamReader(getResources().openRawResource(id)));
-            Vector<SGFTree> trees = SGFTree.load(reader);
-            Log.e("MainActivity", "UseTime:" + (System.currentTimeMillis() - time) + " Tree size:" + trees.size());
+            SGFGame game = loader.load(getResources().openRawResource(id));
+            Log.e("MainActivity", "SGFLoader UseTime:" + (System.currentTimeMillis() - time) + " Tree:" + game.getTree());
+            mSGFLoadTime += (System.currentTimeMillis() - time);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        } catch (SGFException e) {
+            e.printStackTrace();
         }
     }
 }
