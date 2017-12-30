@@ -30,6 +30,7 @@ import java.util.List;
 import cn.ezandroid.sgf.tokens.AddBlackToken;
 import cn.ezandroid.sgf.tokens.AddEmptyToken;
 import cn.ezandroid.sgf.tokens.AddWhiteToken;
+import cn.ezandroid.sgf.tokens.ApplicationToken;
 import cn.ezandroid.sgf.tokens.ArrowToken;
 import cn.ezandroid.sgf.tokens.BlackMoveToken;
 import cn.ezandroid.sgf.tokens.BlackNameToken;
@@ -181,6 +182,7 @@ public class SGFLoader {
                 // We found a new leaf, so read it.
                 //
                 case (int) ';':
+                default: // Sina棋谱格式不标准，第一个'('后不是';'，导致解析失败，这里不抛出异常进行兼容
                     tree.addLeaf(readLeaf(st));
                     break;
 
@@ -198,8 +200,8 @@ public class SGFLoader {
                 // A major parsing error has occured.  Return whatever was parsed to
                 // this point.
                 //
-                default:
-                    throw new SGFException(INVALID_SGF_FILE);
+//                default:
+//                    throw new SGFException(INVALID_SGF_FILE);
             }
         }
 
@@ -328,6 +330,8 @@ public class SGFLoader {
             //
         else if (tokenName.equals("FF"))
             token = new FileFormatToken();
+        else if (tokenName.equals("AP"))
+            token = new ApplicationToken();
         else if (tokenName.equals("GM") || tokenName.equals("GAME"))
             token = new GameTypeToken();
         else if (tokenName.equals("CA"))
