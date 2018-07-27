@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
 import java.util.LinkedList;
-import java.util.List;
 
 import cn.ezandroid.lib.sgf.tokens.AddBlackToken;
 import cn.ezandroid.lib.sgf.tokens.AddEmptyToken;
@@ -84,7 +83,7 @@ public class SGFLoader {
 
 //    private final static String INVALID_SGF_FILE = "Invalid SGF File.";
 
-    private List<SGFToken> mGameInfoTokens = new LinkedList<>();
+    private LinkedList<SGFToken> mGameInfoTokens = new LinkedList<>();
 
     /**
      * constructor.

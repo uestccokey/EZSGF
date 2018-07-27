@@ -25,7 +25,7 @@ package cn.ezandroid.lib.sgf;
  */
 public final class Point {
 
-    public int x = 0, y = 0;
+    public byte x = 0, y = 0;
 
     /**
      * Constructs a new point at (0, 0).
@@ -38,7 +38,7 @@ public final class Point {
      * @param newX - The x portion of this point's coordinate.
      * @param newY - The y portion of this point's coordinate.
      */
-    public Point(int newX, int newY) {
+    public Point(byte newX, byte newY) {
         x = newX;
         y = newY;
     }

@@ -24,11 +24,11 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 int n = 1;
                 for (int i = 0; i < n; i++) {
-//                    loadRawSGF(R.raw.simple);
+                    loadRawSGF(R.raw.simple);
+                    loadRawSGF(R.raw.complex);
                     loadRawSGF(R.raw.sina);
 //                    loadRawSGF(R.raw.normal);
 //                    loadRawSGF(R.raw.normal2);
-//                    loadRawSGF(R.raw.complex);
 //                    loadRawSGF(R.raw.alphago_opening_book);
                 }
             }

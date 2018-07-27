@@ -70,8 +70,8 @@ public class PlacementToken extends SGFToken {
         if ((token == (int) ']') || (token != StreamTokenizer.TT_WORD))
             return true;
 
-        int xCoord = -1;
-        int yCoord = -1;
+        byte xCoord = -1;
+        byte yCoord = -1;
         try {
             int xChar = st.sval.charAt(0);
             int yChar = st.sval.charAt(1);
@@ -94,12 +94,12 @@ public class PlacementToken extends SGFToken {
      * through 'Z', this method returns the appropriate row/column value.  If
      * the token isn't between 'a' and 'z', or 'A' and 'Z', this returns 0;
      */
-    private static int coordFromChar(int ch) {
+    private static byte coordFromChar(int ch) {
         if ((ch >= 'a') && (ch <= 'z'))
-            return ch - 'a' + 1;
+            return (byte) (ch - 'a' + 1);
 
         if ((ch >= 'A') && (ch <= 'Z'))
-            return ch - 'A' + 1;
+            return (byte) (ch - 'A' + 1);
 
         return 0;
     }
@@ -114,16 +114,15 @@ public class PlacementToken extends SGFToken {
      * Returns:
      * The X coordinate of the placement.
      */
-    public int getX() { return mPoint.x; }
+    public byte getX() { return mPoint.x; }
 
-    private void setX(int x) { mPoint.x = x; }
+    private void setX(byte x) { mPoint.x = x; }
 
     /**
      * Returns:
      * The Y coordinate of the placement.
      */
-    public int getY() { return mPoint.y; }
+    public byte getY() { return mPoint.y; }
 
-    private void setY(int y) { mPoint.y = y; }
+    private void setY(byte y) { mPoint.y = y; }
 }
-
