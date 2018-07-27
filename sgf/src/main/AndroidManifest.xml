@@ -1,3 +1,1 @@
-<manifest package="cn.ezandroid.sgf">
-
-</manifest>
+<manifest package="cn.ezandroid.lib.sgf" />
