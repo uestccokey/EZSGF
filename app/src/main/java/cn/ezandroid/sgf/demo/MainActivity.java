@@ -9,7 +9,6 @@ import java.io.IOException;
 import cn.ezandroid.lib.sgf.SGFException;
 import cn.ezandroid.lib.sgf.SGFGame;
 import cn.ezandroid.lib.sgf.SGFLoader;
-import cn.ezandroid.lib.sgf.demo.R;
 
 public class MainActivity extends AppCompatActivity {
 
