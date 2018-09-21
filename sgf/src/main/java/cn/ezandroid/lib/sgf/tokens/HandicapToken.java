@@ -20,21 +20,13 @@
 package cn.ezandroid.lib.sgf.tokens;
 
 /**
- * 贴目
+ * 让子
  */
-public class KomiToken extends NumberToken implements InfoToken {
+public class HandicapToken extends NumberToken implements InfoToken {
 
-    public KomiToken() {}
+    public HandicapToken() { }
 
-    /**
-     * 默认贴7.5目
-     */
-    protected float getDefault() {
-        return 7.5f;
-    }
+    protected float getDefault() { return 0; }
 
-    public float getKomi() {
-        return getNumber();
-    }
+    public float getHandicap() { return getNumber(); }
 }
-

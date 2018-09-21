@@ -47,6 +47,7 @@ import cn.ezandroid.lib.sgf.tokens.FileFormatToken;
 import cn.ezandroid.lib.sgf.tokens.GameCommentToken;
 import cn.ezandroid.lib.sgf.tokens.GameNameToken;
 import cn.ezandroid.lib.sgf.tokens.GameTypeToken;
+import cn.ezandroid.lib.sgf.tokens.HandicapToken;
 import cn.ezandroid.lib.sgf.tokens.InfoToken;
 import cn.ezandroid.lib.sgf.tokens.KoToken;
 import cn.ezandroid.lib.sgf.tokens.KomiToken;
@@ -66,6 +67,7 @@ import cn.ezandroid.lib.sgf.tokens.SourceToken;
 import cn.ezandroid.lib.sgf.tokens.SquareToken;
 import cn.ezandroid.lib.sgf.tokens.TextToken;
 import cn.ezandroid.lib.sgf.tokens.TimeLimitToken;
+import cn.ezandroid.lib.sgf.tokens.TriangleToken;
 import cn.ezandroid.lib.sgf.tokens.UserToken;
 import cn.ezandroid.lib.sgf.tokens.WhiteMoveToken;
 import cn.ezandroid.lib.sgf.tokens.WhiteNameToken;
@@ -295,6 +297,8 @@ public class SGFLoader {
             token = new CircleToken();
         else if (tokenName.equals("SQ"))
             token = new SquareToken();
+        else if (tokenName.equals("TR"))
+            token = new TriangleToken();
         else if (tokenName.equals("LB"))
             token = new LabelToken();
         else if (tokenName.equals("MN"))
@@ -339,6 +343,8 @@ public class SGFLoader {
             token = new SizeToken();
         else if (tokenName.equals("KM") || tokenName.equals("KOMI"))
             token = new KomiToken();
+        else if (tokenName.equals("HA") || tokenName.equals("HANDICAP"))
+            token = new HandicapToken();
         else if (tokenName.equals("PW") || tokenName.equals("PLAYERWHITE"))
             token = new WhiteNameToken();
         else if (tokenName.equals("PB") || tokenName.equals("PLAYERBLACK"))

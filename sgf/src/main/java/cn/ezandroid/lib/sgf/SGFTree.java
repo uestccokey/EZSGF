@@ -35,7 +35,7 @@ public final class SGFTree {
     /**
      * Empty constructor.  No leaves, no variations.  Rather useless by itself.
      */
-    public SGFTree() { }
+    public SGFTree() {}
 
     /**
      * Adds a leaf to the end of this tree's list of leaves.  Remember that
