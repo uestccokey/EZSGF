@@ -33,5 +33,5 @@ publish {
     artifactId = 'SGF' // 项目名称
     publishVersion = rootProject.ext.sdkVersionName // 版本号
     desc = 'A fast speed and small memory SGF file parser and generator.(一个速度快，内存占用小的SGF文件解析和生成器)' // 描述
-    website = 'https://github.com/uestccokey/SGF'// 网站
+    website = 'https://github.com/uestccokey/EZSGF'// 网站
 }
