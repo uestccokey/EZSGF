@@ -9,9 +9,9 @@ A fast speed and small memory SGF file parser and generator (based on [bb4-sgf](
 #### Gradle
 ``` gradle
 dependencies {
-    compile 'cn.ezandroid:SGF:2.0.1' // Gradle version < 3.0
+    compile 'cn.ezandroid:SGF:{Latest version}' // Gradle version < 3.0
     // or
-    implementation 'cn.ezandroid:SGF:2.0.1' // Gradle version >= 3.0
+    implementation 'cn.ezandroid:SGF:{Latest version}' // Gradle version >= 3.0
 }
 ```
 
