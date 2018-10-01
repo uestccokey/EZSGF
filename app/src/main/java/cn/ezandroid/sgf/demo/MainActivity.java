@@ -16,8 +16,6 @@ import cn.ezandroid.lib.sgf.tokens.SGFToken;
 
 public class MainActivity extends AppCompatActivity {
 
-    private long mSGFLoadTime;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,12 +25,12 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 int n = 1;
                 for (int i = 0; i < n; i++) {
-                    loadRawSGF(R.raw.error1);
 //                    loadRawSGF(R.raw.simple);
 //                    loadRawSGF(R.raw.complex);
 //                    loadRawSGF(R.raw.sina);
 //                    loadRawSGF(R.raw.normal);
 //                    loadRawSGF(R.raw.normal2);
+                    loadRawSGF(R.raw.normal3);
 //                    loadRawSGF(R.raw.alphago_opening_book);
                 }
             }
@@ -71,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e("MainActivity", "SGFLoader UseTime:" + (System.currentTimeMillis() - time)
                     + " Tree:" + tree.getLeafCount() + " " + tree.getVariationCount());
             extractMoveList(tree);
-            mSGFLoadTime += (System.currentTimeMillis() - time);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SGFException e) {
