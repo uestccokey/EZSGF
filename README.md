@@ -1,4 +1,4 @@
-# SGF
+# EZSGF
 
 A fast speed and small memory SGF file parser and generator (based on [bb4-sgf](https://github.com/bb4/bb4-sgf)).
 
