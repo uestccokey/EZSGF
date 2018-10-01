@@ -1,1 +1,1 @@
-include ':app', ':sgf'
+include ':app', ':ezsgf'
