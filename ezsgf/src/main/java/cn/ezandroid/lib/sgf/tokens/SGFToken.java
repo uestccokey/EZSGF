@@ -20,6 +20,7 @@
 package cn.ezandroid.lib.sgf.tokens;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StreamTokenizer;
 
 import cn.ezandroid.lib.sgf.SGFException;
@@ -30,7 +31,9 @@ import cn.ezandroid.lib.sgf.SGFException;
  * subclass is the generic TextToken (the superclass to nearly all other
  * tokens).
  */
-public abstract class SGFToken {
+public abstract class SGFToken implements Serializable {
+
+    private static final long serialVersionUID = 42L;
 
     public SGFToken() {}
 

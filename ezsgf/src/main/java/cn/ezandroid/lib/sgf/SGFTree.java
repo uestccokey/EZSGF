@@ -19,6 +19,7 @@
 
 package cn.ezandroid.lib.sgf;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -27,7 +28,9 @@ import java.util.LinkedList;
  * file, but this isn't a requirement -- they could be generated from a
  * game that is being played.
  */
-public final class SGFTree {
+public final class SGFTree implements Serializable {
+
+    private static final long serialVersionUID = 42L;
 
     private LinkedList<SGFLeaf> mLeaves = new LinkedList<>();
     private LinkedList<SGFTree> mVariations = new LinkedList<>();

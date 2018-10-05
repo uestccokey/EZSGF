@@ -19,11 +19,15 @@
 
 package cn.ezandroid.lib.sgf;
 
+import java.io.Serializable;
+
 /**
  * Represents a point on a Goban.  The x and y values are directly
  * accessible due to their common, and frequent use.
  */
-public final class Point {
+public final class Point implements Serializable {
+
+    private static final long serialVersionUID = 42L;
 
     public byte x = 0, y = 0;
 

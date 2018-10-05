@@ -83,8 +83,6 @@ import cn.ezandroid.lib.sgf.tokens.WhiteTimeToken;
  */
 public class SGFLoader {
 
-//    private final static String INVALID_SGF_FILE = "Invalid SGF File.";
-
     private LinkedList<SGFToken> mGameInfoTokens = new LinkedList<>();
 
     /**

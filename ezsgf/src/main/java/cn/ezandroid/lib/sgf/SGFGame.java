@@ -19,6 +19,7 @@
 
 package cn.ezandroid.lib.sgf;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -39,7 +40,9 @@ import cn.ezandroid.lib.sgf.tokens.InfoToken;
  * game, so the idea of allowing anyone add InfoTokens is valid (rather
  * than keeping it protected in the family, so to speak).
  */
-public final class SGFGame {
+public final class SGFGame implements Serializable {
+
+    private static final long serialVersionUID = 42L;
 
     private SGFTree mTree;
     private LinkedList<InfoToken> mInfoTokens = new LinkedList<>();

@@ -19,6 +19,7 @@
 
 package cn.ezandroid.lib.sgf;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -32,7 +33,9 @@ import cn.ezandroid.lib.sgf.tokens.SGFToken;
  * this does not mean a move must always be associated with a leaf, that's
  * just what happens more often than not).
  */
-public final class SGFLeaf {
+public final class SGFLeaf implements Serializable {
+
+    private static final long serialVersionUID = 42L;
 
     private LinkedList<SGFToken> mTokens = new LinkedList<>();
 
