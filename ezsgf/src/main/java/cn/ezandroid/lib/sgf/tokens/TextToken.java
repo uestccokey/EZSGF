@@ -45,9 +45,8 @@ public class TextToken extends SGFToken {
      */
     protected boolean parseContent(StreamTokenizer st)
             throws IOException, SGFException {
-        int token = 0,
-                prevToken = 0;
-        StringBuffer sb = new StringBuffer();
+        int token = 0, prevToken = 0;
+        StringBuilder sb = new StringBuilder();
 
         while ((token = st.nextToken()) != StreamTokenizer.TT_EOF) {
             switch (token) {
@@ -114,6 +113,11 @@ public class TextToken extends SGFToken {
 
     private void setText(String text) {
         mText = text;
+    }
+
+    @Override
+    public String toString() {
+        return mText;
     }
 }
 

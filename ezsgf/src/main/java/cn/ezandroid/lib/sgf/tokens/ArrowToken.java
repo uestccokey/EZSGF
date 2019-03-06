@@ -22,7 +22,7 @@ package cn.ezandroid.lib.sgf.tokens;
 /**
  * 箭头标记
  */
-public class ArrowToken extends PlacementListToken implements MarkupToken {
+public class ArrowToken extends MarkupToken {
 
     public ArrowToken() {}
 }

@@ -28,5 +28,5 @@ public class HandicapToken extends NumberToken implements InfoToken {
 
     protected float getDefault() { return 0; }
 
-    public float getHandicap() { return getNumber(); }
+    public int getHandicap() { return (int) getNumber(); }
 }

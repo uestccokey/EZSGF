@@ -22,7 +22,7 @@ package cn.ezandroid.lib.sgf.tokens;
 /**
  * 直线标记
  */
-public class LineToken extends PlacementListToken implements MarkupToken {
+public class LineToken extends MarkupToken {
 
     public LineToken() {}
 }

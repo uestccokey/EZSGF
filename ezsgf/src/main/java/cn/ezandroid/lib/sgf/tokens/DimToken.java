@@ -20,9 +20,9 @@
 package cn.ezandroid.lib.sgf.tokens;
 
 /**
- * A list of dimmed points.
+ * 暗点标记
  */
-public class DimToken extends PlacementListToken implements MarkupToken {
+public class DimToken extends MarkupToken {
 
     public DimToken() {}
 }

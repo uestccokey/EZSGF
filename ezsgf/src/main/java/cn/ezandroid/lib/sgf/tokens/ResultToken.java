@@ -29,31 +29,21 @@ import cn.ezandroid.lib.sgf.SGFException;
  */
 public class ResultToken extends TextToken implements InfoToken {
 
-    public final static int WHITE_WINS = 1, // 白胜
-            BLACK_WINS = 2, // 黑胜
-            JIGO = 3, // 和棋
-            SUSPENDED = 4; // 暂停
+    public static final char
+            JIGO = '0', // 和棋
+            BLACK = 'B',
+            WHITE = 'W',
+            VOID = 'V',
+            UNKNOWN_WINNER = '?';
 
-    public final static int BY_SCORE = 1,
-            BY_RESIGNATION = 2,
-            BY_TIME = 3,
-            BY_FORFEIT = 4,
-            BY_UNKNOWN = 5,
-            BY_JIGO = 6;
+    public static final double
+            RESIGN = -1,
+            TIME = -2,
+            FORFEIT = -3, // 犯规
+            UNKNOWN_AMOUNT = -9;
 
-    // Indext into the resulting text string where the final score characters
-    // are located.  This only applies if there is a definitive winner
-    // (BLACK_WINS or WHITE_WINS), BY_SCORE.
-    //
-    private final static int SCORE_INDEX = 2;
-
-    // By default, the winner is unknown, and the reason for winning is unknown.
-    //
-    private int mWinner = SUSPENDED, mReason = BY_UNKNOWN;
-
-    // How much did the winner win by?  (Only counts when there is a winner.)
-    //
-    private float mScore = 0;
+    private char mWinner;
+    private double mScore;
 
     public ResultToken() { }
 
@@ -77,139 +67,97 @@ public class ResultToken extends TextToken implements InfoToken {
         if (!super.parseContent(st))
             return false;
 
-        String text = getText();
-
-        if (text.startsWith("B"))
-            setWinner(BLACK_WINS);
-        else if (text.startsWith("W"))
-            setWinner(WHITE_WINS);
-        else if (text.equals("0") ||
-                text.equalsIgnoreCase("DRAW") ||
-                text.equalsIgnoreCase("JIGO"))
-            setWinner(JIGO);
-        else {
-            setWinner(SUSPENDED);
-            return true;
+        String result = getText();
+        if (result.isEmpty()) {
+            return false;
         }
 
-        try {
-            // The third character should be R, T, or F.  If it isn't, then the
-            // third character and on is a number, representing how much the
-            // winner won by.
-            //
-            switch (text.charAt(2)) {
-                case 'R':
-                    setReason(BY_RESIGNATION);
-                    break;
-                case 'T':
-                    setReason(BY_TIME);
-                    break;
-                case 'F':
-                    setReason(BY_FORFEIT);
-                    break;
-                case 'J':
-                case '0':
-                    setReason(BY_JIGO);
-                    break;
+        char c = result.toUpperCase().charAt(0);
 
-                default:
-                    setReason(BY_SCORE);
-                    setScore(Float.valueOf(text.substring(SCORE_INDEX, text.length())));
-                    break;
+        if (c == '0' || c == 'D' || c == 'J') {
+            mWinner = JIGO;
+        } else if (c == 'V') {
+            mWinner = VOID;
+        } else if (c == '?') {
+            mWinner = UNKNOWN_WINNER;
+        } else {
+            if (c == 'B')
+                mWinner = BLACK;
+            else if (c == 'W')
+                mWinner = WHITE;
+            else
+                mWinner = UNKNOWN_WINNER;
+
+            mScore = UNKNOWN_AMOUNT;
+            if (result.length() > 2) {
+                c = result.charAt(2);
+                if (c == 'R')
+                    mScore = RESIGN;
+                else if (c == 'T')
+                    mScore = TIME;
+                else if (c == 'F')
+                    mScore = FORFEIT;
+                else if (Character.isDigit(c)) {
+                    try {
+                        mScore = parseScore(result.substring(2), '.');
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
             }
-        } catch (Exception e) {
         }
 
         return true;
     }
 
+    private float parseScore(String number, char decimalSeparator) {
+        int dotPos = number.indexOf(decimalSeparator);
+        if (dotPos < 0)
+            return Integer.parseInt(number);
+        int integerPart = Integer.parseInt(number.substring(0, dotPos));
+        int decimalPart = Integer.parseInt(number.substring(dotPos + 1, dotPos + 2));
+        return integerPart + (integerPart >= 0 ? 1f : -1f) * (decimalPart / 10f);
+    }
+
     /**
-     * Returns one of the "winner" constants (WHITE_WINS, BLACK_WINS,
-     * JIGO, or SUSPENDED).
-     *
-     * @return Who won, tie game, or suspended (check against constants).
+     * Returns the mWinner represented by this instance. It can be one of the following values (constants) :<br/>
+     * JIGO, BLACK, WHITE, VOID, UNKNOWN_WINNER
      */
-    public int getWinner() {
+    public char getWinner() {
         return mWinner;
     }
 
-    private void setWinner(int winner) {
-        mWinner = winner;
-    }
-
     /**
-     * Returns one of the "reason" constants (BY_SCORE, BY_TIME, BY_FORFEIT,
-     * BY_RESIGNATION or BY_UNKNOWN).
-     *
-     * @return The reason for winning.
+     * Returns the mScore represented by this instance. It can be one of the following values (constants) :<br/>
+     * RESIGN, TIME, FORFEIT, UNKNOWN_AMOUNT, or the result as a number.
      */
-    public int getReason() {
-        return mReason;
-    }
-
-    private void setReason(int reason) {
-        mReason = reason;
-    }
-
-    /**
-     * Provided getReason returns BY_SCORE, this method will return how much
-     * the winner won by.
-     *
-     * @return How many points the winner obtained.
-     */
-    public float getScore() {
+    public double getScore() {
         return mScore;
     }
 
-    private void setScore(float score) {
-        mScore = score;
-    }
-
-    /**
-     * Returns a human-readable string of the game's result.
-     *
-     * @return English text stating the game's result.
-     */
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        switch (getWinner()) {
-            case WHITE_WINS:
-                sb.append("White by ");
-                break;
-            case BLACK_WINS:
-                sb.append("Black by ");
-                break;
-            case JIGO:
-                sb.append("Jigo.");
-                return sb.toString();
-            case SUSPENDED:
-                sb.append("Suspended.");
-                return sb.toString();
-        }
-
-        switch (getReason()) {
-            case BY_SCORE:
-                sb.append(getScore());
-                break;
-            case BY_RESIGNATION:
-                sb.append("resignation");
-                break;
-            case BY_TIME:
-                sb.append("time");
-                break;
-            case BY_FORFEIT:
-                sb.append("forfeit");
-                break;
-            case BY_UNKNOWN:
-                sb.append("unknown reason");
-                break;
-            case BY_JIGO:
-                sb.append("jigo");
-                break;
-        }
-
-        sb.append('.');
-        return sb.toString();
-    }
+//    /**
+//     * Returns the result in a valid SGF property format (without the RE[] part).
+//     */
+//    @Override
+//    public String toString() {
+//        if (mWinner == JIGO)
+//            return "0";
+//        else if (mWinner == VOID)
+//            return "Void";
+//        else if (mWinner == UNKNOWN_WINNER)
+//            return "?";
+//
+//        String result;
+//        if (mScore > 0)
+//            result = ((int) mScore) + "." + ((int) Math.round(mScore * 10) % 10);
+//        else if (mScore == RESIGN)
+//            result = "R";
+//        else if (mScore == TIME)
+//            result = "T";
+//        else if (mScore == FORFEIT)
+//            result = "F";
+//        else
+//            result = "";
+//
+//        return mWinner + "+" + result;
+//    }
 }

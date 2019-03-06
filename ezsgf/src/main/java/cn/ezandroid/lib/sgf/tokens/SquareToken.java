@@ -22,7 +22,7 @@ package cn.ezandroid.lib.sgf.tokens;
 /**
  * 方块标记
  */
-public class SquareToken extends PlacementListToken implements MarkupToken {
+public class SquareToken extends MarkupToken {
 
     public SquareToken() {}
 }

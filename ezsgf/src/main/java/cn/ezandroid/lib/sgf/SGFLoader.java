@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import cn.ezandroid.lib.sgf.tokens.AddBlackToken;
 import cn.ezandroid.lib.sgf.tokens.AddEmptyToken;
 import cn.ezandroid.lib.sgf.tokens.AddWhiteToken;
+import cn.ezandroid.lib.sgf.tokens.AnnotationToken;
 import cn.ezandroid.lib.sgf.tokens.ApplicationToken;
 import cn.ezandroid.lib.sgf.tokens.ArrowToken;
 import cn.ezandroid.lib.sgf.tokens.BlackMoveToken;
@@ -90,6 +91,22 @@ public class SGFLoader {
      * Barry: I would really like this class to be abstract and this method protected, but jigo classes use it.
      */
     public SGFLoader() {}
+
+    public SGFGame load(InputStream is, String charset)
+            throws IOException, SGFException {
+        // Create and initialize a new StreamTokenizer, to make parsing simple.
+        //
+        StreamTokenizer st = new StreamTokenizer(
+                new BufferedReader(new InputStreamReader(is, charset)));
+
+        resetTokenizer(st);
+
+        SGFGame sgfGame = readGame(st);
+
+        is.close();
+
+        return sgfGame;
+    }
 
     /**
      * Returns a new SGFGame, provided a valid (and open) InputStream.
@@ -377,13 +394,15 @@ public class SGFLoader {
             token = new RoundToken();
         else if (tokenName.equals("SO") || tokenName.equals("SOURCE"))
             token = new SourceToken();
+        else if (tokenName.equals("AN"))
+            token = new AnnotationToken();
         else if (tokenName.equals("US"))
             token = new UserToken();
-        else if (tokenName.equals("GC"))
+        else if (tokenName.equals("GC") || tokenName.equals("TC"))
             token = new GameCommentToken();
         else if (tokenName.equals("RU"))
             token = new RuleToken();
-        else if (tokenName.equals("GN") || tokenName.equals("GAMENAME"))
+        else if (tokenName.equals("GN") || tokenName.equals("TE") || tokenName.equals("GAMENAME"))
             token = new GameNameToken();
 
             // If all else fails, just read it as a generic Text token (as opposed to

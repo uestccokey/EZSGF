@@ -22,7 +22,7 @@ package cn.ezandroid.lib.sgf.tokens;
 /**
  * 三角标记
  */
-public class TriangleToken extends PlacementListToken implements MarkupToken {
+public class TriangleToken extends MarkupToken {
 
     public TriangleToken() {}
 }

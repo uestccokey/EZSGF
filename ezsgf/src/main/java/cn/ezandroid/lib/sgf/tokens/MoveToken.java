@@ -23,11 +23,22 @@ package cn.ezandroid.lib.sgf.tokens;
  * 走子属性父类
  */
 public abstract class MoveToken extends PlacementListToken {
+//
+//    public boolean isPass() {
+//        return (getX() == 0) && (getY() == 0);
+//    }
 
-    public boolean isPass() {
-        return (getX() == 0) && (getY() == 0);
+    /**
+     * 盘外招都视为Pass
+     *
+     * @param boardSize
+     * @return
+     */
+    public boolean isPass(int boardSize) {
+        int x = getX();
+        int y = getY();
+        return (x <= 0) || (y <= 0) || (x >= boardSize + 1) || (y >= boardSize + 1);
     }
 
     public abstract boolean isBlack();
 }
-

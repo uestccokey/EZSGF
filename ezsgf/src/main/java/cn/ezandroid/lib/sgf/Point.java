@@ -53,5 +53,28 @@ public final class Point implements Serializable {
     public Point(Point pt) {
         this(pt.x, pt.y);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Point)) return false;
+
+        Point point = (Point) o;
+
+        if (x != point.x) return false;
+        return y == point.y;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) x;
+        result = 31 * result + (int) y;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Point(" + x + ", " + y + ")";
+    }
 }
 

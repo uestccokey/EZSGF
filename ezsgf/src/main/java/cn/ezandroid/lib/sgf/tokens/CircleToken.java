@@ -22,7 +22,7 @@ package cn.ezandroid.lib.sgf.tokens;
 /**
  * 圆形标记
  */
-public class CircleToken extends PlacementListToken implements MarkupToken {
+public class CircleToken extends MarkupToken {
 
     public CircleToken() {}
 }

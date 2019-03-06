@@ -31,7 +31,7 @@ import cn.ezandroid.lib.sgf.Point;
  */
 public class PlacementListToken extends PlacementToken {
 
-    private LinkedList<Point> mPoints = new LinkedList<Point>();
+    private LinkedList<Point> mPoints = new LinkedList<>();
 
     public PlacementListToken() { }
 
@@ -44,8 +44,7 @@ public class PlacementListToken extends PlacementToken {
             if (parsePoint(st)) {
                 addPoint(new Point(getPoint()));
             }
-        }
-        while (st.nextToken() == (int) '[');
+        } while (st.nextToken() == (int) '[');
 
         st.pushBack();
 

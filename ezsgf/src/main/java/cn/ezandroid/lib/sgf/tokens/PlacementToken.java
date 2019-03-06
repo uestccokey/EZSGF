@@ -94,7 +94,7 @@ public class PlacementToken extends SGFToken {
      * through 'Z', this method returns the appropriate row/column value.  If
      * the token isn't between 'a' and 'z', or 'A' and 'Z', this returns 0;
      */
-    private static byte coordFromChar(int ch) {
+    static byte coordFromChar(int ch) {
         if ((ch >= 'a') && (ch <= 'z'))
             return (byte) (ch - 'a' + 1);
 
@@ -116,7 +116,7 @@ public class PlacementToken extends SGFToken {
      */
     public byte getX() { return mPoint.x; }
 
-    private void setX(byte x) { mPoint.x = x; }
+    public void setX(byte x) { mPoint.x = x; }
 
     /**
      * Returns:
@@ -124,5 +124,5 @@ public class PlacementToken extends SGFToken {
      */
     public byte getY() { return mPoint.y; }
 
-    private void setY(byte y) { mPoint.y = y; }
+    public void setY(byte y) { mPoint.y = y; }
 }

@@ -22,7 +22,7 @@ package cn.ezandroid.lib.sgf.tokens;
 /**
  * 录入者信息
  */
-public class UserToken extends TextToken {
+public class UserToken extends TextToken implements InfoToken {
 
     public UserToken() {}
 

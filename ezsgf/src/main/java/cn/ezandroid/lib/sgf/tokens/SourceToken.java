@@ -22,7 +22,7 @@ package cn.ezandroid.lib.sgf.tokens;
 /**
  * 棋谱来源
  */
-public class SourceToken extends TextToken {
+public class SourceToken extends TextToken implements InfoToken {
 
     public SourceToken() {}
 

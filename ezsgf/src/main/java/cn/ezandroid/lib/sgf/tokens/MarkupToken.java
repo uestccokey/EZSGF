@@ -31,6 +31,6 @@ package cn.ezandroid.lib.sgf.tokens;
  * Square   (SQ)
  * Triangle (TR)
  */
-public interface MarkupToken {
+public abstract class MarkupToken extends PlacementListToken {
 }
 

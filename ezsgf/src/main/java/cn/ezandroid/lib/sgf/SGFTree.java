@@ -22,6 +22,7 @@ package cn.ezandroid.lib.sgf;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 /**
  * Contains an entire game tree.  Game trees are typically read in from an SGF
@@ -32,13 +33,18 @@ public final class SGFTree implements Serializable {
 
     private static final long serialVersionUID = 42L;
 
+    private SGFTree mParentTree;
     private LinkedList<SGFLeaf> mLeaves = new LinkedList<>();
     private LinkedList<SGFTree> mVariations = new LinkedList<>();
+
+    private ListIterator<SGFLeaf> mLeavesIterator;
+    private ListIterator<SGFTree> mVariationIterator;
 
     /**
      * Empty constructor.  No leaves, no variations.  Rather useless by itself.
      */
-    public SGFTree() {}
+    public SGFTree() {
+    }
 
     /**
      * Adds a leaf to the end of this tree's list of leaves.  Remember that
@@ -65,6 +71,21 @@ public final class SGFTree implements Serializable {
      */
     public Iterator<SGFLeaf> getLeaves() {
         return mLeaves.iterator();
+    }
+
+    public ListIterator<SGFLeaf> getListLeaves() {
+        if (mLeavesIterator == null) {
+            mLeavesIterator = mLeaves.listIterator();
+        }
+        return mLeavesIterator;
+    }
+
+    public void setParentTree(SGFTree parentTree) {
+        mParentTree = parentTree;
+    }
+
+    public SGFTree getParentTree() {
+        return mParentTree;
     }
 
     /**
@@ -100,8 +121,10 @@ public final class SGFTree implements Serializable {
      * @param tree - The tree to add to the end of this tree's variation list.
      */
     public void addTree(SGFTree tree) {
-        if (tree != null)
+        if (tree != null) {
+            tree.setParentTree(this);
             mVariations.add(tree);
+        }
     }
 
     /**
@@ -111,6 +134,13 @@ public final class SGFTree implements Serializable {
      */
     public Iterator<SGFTree> getTrees() {
         return mVariations.iterator();
+    }
+
+    public ListIterator<SGFTree> getListTrees() {
+        if (mVariationIterator == null) {
+            mVariationIterator = mVariations.listIterator();
+        }
+        return mVariationIterator;
     }
 }
 

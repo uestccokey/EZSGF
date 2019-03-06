@@ -22,7 +22,7 @@ package cn.ezandroid.lib.sgf.tokens;
 /**
  * 选中标记
  */
-public class SelectedToken extends PlacementListToken implements MarkupToken {
+public class SelectedToken extends MarkupToken {
 
     public SelectedToken() {}
 }

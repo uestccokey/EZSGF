@@ -6,7 +6,7 @@ package cn.ezandroid.lib.sgf.tokens;
  * @author like
  * @date 2017-12-30
  */
-public class MarkToken extends PlacementListToken implements MarkupToken {
+public class MarkToken extends MarkupToken {
 
     public MarkToken() {}
 }

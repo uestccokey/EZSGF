@@ -22,6 +22,7 @@ package cn.ezandroid.lib.sgf;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 import cn.ezandroid.lib.sgf.tokens.SGFToken;
 
@@ -64,6 +65,14 @@ public final class SGFLeaf implements Serializable {
      */
     public Iterator<SGFToken> getTokens() {
         return mTokens.iterator();
+    }
+
+    public ListIterator<SGFToken> getListTokens() {
+        return mTokens.listIterator();
+    }
+
+    public int getTokensSize() {
+        return mTokens.size();
     }
 
     /**
