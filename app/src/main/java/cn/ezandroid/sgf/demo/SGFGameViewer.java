@@ -41,10 +41,14 @@ public class SGFGameViewer {
 
     private byte[] mBoard;
     private Game mGame;
+    private ZobristHash mHash;
+
+    private int mBoardSize = 19;
 
     public SGFGameViewer(SGFGame game) {
-        mBoard = new byte[19 * 19];
-        mGame = new Game(19);
+        mBoard = new byte[mBoardSize * mBoardSize];
+        mGame = new Game(mBoardSize);
+        mHash = new ZobristHash(mGame);
         mSGFTree = game.getTree();
         mTrees = mSGFTree.getListTrees();
         while (mSGFTree.getLeafCount() == 0) {
@@ -80,6 +84,16 @@ public class SGFGameViewer {
             return false;
         }
         return mLeaves != null;
+    }
+
+    private int getStateIndex(int index) {
+        switch (mBoard[index]) {
+            case ZobristHash.STATE_BLACK:
+                return 1;
+            case ZobristHash.STATE_WHITE:
+                return 2;
+        }
+        return 0;
     }
 
     /**
@@ -154,8 +168,6 @@ public class SGFGameViewer {
             mTrees = mSGFTree.getListTrees();
             mLeaves = mSGFTree.getListLeaves();
 
-            Log.e("SGF", "switchNextBranch:" + mSGFTree.getLeafCount() + " " + mSGFTree.getTreeCount());
-//
 //            while (mLeaves.hasPrevious()) {
 //                mLeaves.previous();
 //            }
@@ -182,8 +194,6 @@ public class SGFGameViewer {
             mTrees = mSGFTree.getListTrees();
             mLeaves = mSGFTree.getListLeaves();
 
-            Log.e("SGF", "switchMainBranch:" + mSGFTree.getLeafCount() + " " + mSGFTree.getTreeCount());
-//
 //            while (mLeaves.hasPrevious()) {
 //                mLeaves.previous();
 //            }
@@ -194,27 +204,31 @@ public class SGFGameViewer {
     }
 
     private void undoToken(SGFToken token) {
-        Log.e("SGF", "undoToken:" + token);
         if (token instanceof PlacementListToken) {
             Iterator<Point> points = ((PlacementListToken) token).getPoints();
             while (points.hasNext()) {
                 Point point = points.next();
                 int x = point.x - 1;
                 int y = point.y - 1;
-                int index = x + 19 * y;
+                int index = x + mBoardSize * y;
                 if (token instanceof MoveToken) {
                     Pair<Move, Chain> pair = mGame.undo();
                     if (pair != null) {
                         Move move = pair.first;
-                        Set<Chain> chains = move.getCaptured();
-                        for (Chain chain : chains) {
-                            for (Stone stone : chain.getStones()) {
-                                mBoard[stone.intersection.x + 19 * stone.intersection.y]
-                                        = (stone.color == StoneColor.BLACK) ? BLACK : WHITE;
+                        if (((MoveToken) token).isPass(mBoardSize)) {
+                            mHash.applyPassingMove();
+                        } else {
+                            mHash.applyMove(x, y, getStateIndex(index));
+                            mBoard[index] = EMPTY;
+                            Set<Chain> chains = move.getCaptured();
+                            for (Chain chain : chains) {
+                                for (Stone stone : chain.getStones()) {
+                                    int i = stone.intersection.x + mBoardSize * stone.intersection.y;
+                                    mHash.applyMove(stone.intersection.x, stone.intersection.y, getStateIndex(i));
+                                    mBoard[i] = (stone.color == StoneColor.BLACK) ? BLACK : WHITE;
+                                }
                             }
                         }
-
-                        mBoard[index] = EMPTY;
                     }
                 } else if (token instanceof AddBlackToken) {
                     Stone stone = new Stone();
@@ -222,6 +236,7 @@ public class SGFGameViewer {
                     stone.color = StoneColor.BLACK;
                     mGame.forceRemoveStone(stone);
 
+                    mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
                     mBoard[index] = EMPTY;
                 } else if (token instanceof AddWhiteToken) {
                     Stone stone = new Stone();
@@ -229,6 +244,7 @@ public class SGFGameViewer {
                     stone.color = StoneColor.WHITE;
                     mGame.forceRemoveStone(stone);
 
+                    mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
                     mBoard[index] = EMPTY;
                 } else if (token instanceof AddEmptyToken) {
                     MoveToken original = ((AddEmptyToken) token).getChange(new Point((byte) (x + 1), (byte) (y + 1)));
@@ -239,6 +255,7 @@ public class SGFGameViewer {
                             stone.color = StoneColor.BLACK;
                             mGame.forceAddStone(stone);
 
+                            mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
                             mBoard[index] = BLACK;
                         } else {
                             Stone stone = new Stone();
@@ -246,12 +263,14 @@ public class SGFGameViewer {
                             stone.color = StoneColor.WHITE;
                             mGame.forceAddStone(stone);
 
+                            mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
                             mBoard[index] = WHITE;
                         }
                     }
                 }
             }
         }
+        Log.e("SGFGameViewer", "undoToken:" + token + " " + mHash.getKey().getKey());
     }
 
     /**
@@ -279,8 +298,6 @@ public class SGFGameViewer {
             }
 
             printBoard(mBoard);
-
-            Log.e("SGF", "undo:" + mLeaves.previousIndex() + " " + mSGFTree.getLeafCount() + " " + mSGFTree.getTreeCount());
             return true;
         } else {
             return false;
@@ -288,35 +305,52 @@ public class SGFGameViewer {
     }
 
     private void redoToken(SGFToken token) {
-        Log.e("SGF", "redoToken:" + token);
         if (token instanceof PlacementListToken) {
             Iterator<Point> points = ((PlacementListToken) token).getPoints();
             while (points.hasNext()) {
                 Point point = points.next();
                 int x = point.x - 1;
                 int y = point.y - 1;
-                int index = x + 19 * y;
+                int index = x + mBoardSize * y;
                 if (token instanceof MoveToken) {
                     Move move = mGame.redo();
                     if (move != null) {
-                        mBoard[index] = ((MoveToken) token).isBlack() ? BLACK : WHITE;
-                        Set<Chain> chains = move.getCaptured();
-                        for (Chain chain : chains) {
-                            for (Stone stone : chain.getStones()) {
-                                mBoard[stone.intersection.x + 19 * stone.intersection.y] = EMPTY;
+                        if (((MoveToken) token).isPass(mBoardSize)) {
+                            mHash.applyPassingMove();
+                        } else {
+                            mBoard[index] = ((MoveToken) token).isBlack() ? BLACK : WHITE;
+                            mHash.applyMove(x, y, getStateIndex(index));
+                            Set<Chain> chains = move.getCaptured();
+                            for (Chain chain : chains) {
+                                for (Stone stone : chain.getStones()) {
+                                    int i = stone.intersection.x + mBoardSize * stone.intersection.y;
+                                    mHash.applyMove(stone.intersection.x, stone.intersection.y, getStateIndex(i));
+                                    mBoard[i] = EMPTY;
+                                }
                             }
                         }
                     } else {
-                        HashSet<Chain> chains = new HashSet<>();
-                        Stone stone = new Stone();
-                        stone.intersection = new Intersection(x, y);
-                        stone.color = ((MoveToken) token).isBlack() ? StoneColor.BLACK : StoneColor.WHITE;
-                        mGame.addStone(stone, chains);
+                        if (((MoveToken) token).isPass(mBoardSize)) {
+                            Stone stone = new Stone();
+                            stone.color = ((MoveToken) token).isBlack() ? StoneColor.BLACK : StoneColor.WHITE;
+                            mGame.addPassStone(stone);
 
-                        mBoard[index] = ((MoveToken) token).isBlack() ? BLACK : WHITE;
-                        for (Chain chain : chains) {
-                            for (Stone s : chain.getStones()) {
-                                mBoard[s.intersection.x + 19 * s.intersection.y] = EMPTY;
+                            mHash.applyPassingMove();
+                        } else {
+                            HashSet<Chain> chains = new HashSet<>();
+                            Stone stone = new Stone();
+                            stone.intersection = new Intersection(x, y);
+                            stone.color = ((MoveToken) token).isBlack() ? StoneColor.BLACK : StoneColor.WHITE;
+                            mGame.addStone(stone, chains);
+
+                            mBoard[index] = ((MoveToken) token).isBlack() ? BLACK : WHITE;
+                            mHash.applyMove(x, y, getStateIndex(index));
+                            for (Chain chain : chains) {
+                                for (Stone s : chain.getStones()) {
+                                    int i = s.intersection.x + mBoardSize * s.intersection.y;
+                                    mHash.applyMove(s.intersection.x, s.intersection.y, getStateIndex(i));
+                                    mBoard[i] = EMPTY;
+                                }
                             }
                         }
                     }
@@ -327,6 +361,7 @@ public class SGFGameViewer {
                     mGame.forceAddStone(stone);
 
                     mBoard[index] = BLACK;
+                    mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
                 } else if (token instanceof AddWhiteToken) {
                     Stone stone = new Stone();
                     stone.intersection = new Intersection(x, y);
@@ -334,6 +369,7 @@ public class SGFGameViewer {
                     mGame.forceAddStone(stone);
 
                     mBoard[index] = WHITE;
+                    mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
                 } else if (token instanceof AddEmptyToken) {
                     switch (mBoard[index]) {
                         case BLACK: {
@@ -342,6 +378,7 @@ public class SGFGameViewer {
                             stone.color = StoneColor.BLACK;
                             mGame.forceRemoveStone(stone);
 
+                            mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
                             mBoard[index] = EMPTY;
 
                             MoveToken moveToken = new BlackMoveToken();
@@ -356,6 +393,7 @@ public class SGFGameViewer {
                             stone.color = StoneColor.WHITE;
                             mGame.forceRemoveStone(stone);
 
+                            mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
                             mBoard[index] = EMPTY;
 
                             MoveToken moveToken = new WhiteMoveToken();
@@ -367,6 +405,7 @@ public class SGFGameViewer {
                 }
             }
         }
+        Log.e("SGFGameViewer", "redoToken:" + token + " " + mHash.getKey().getKey());
     }
 
     /**
@@ -386,8 +425,6 @@ public class SGFGameViewer {
             }
 
             printBoard(mBoard);
-
-            Log.e("SGF", "redo:" + mLeaves.nextIndex() + " " + mSGFTree.getLeafCount() + " " + mSGFTree.getTreeCount());
         } else {
             switchMainBranch();
         }
@@ -396,7 +433,7 @@ public class SGFGameViewer {
 
     private void printBoard(byte[] board) {
         List<Point> points = getBranchesPoints();
-        System.err.println("Board:");
+        System.err.println("Board:" + mHash.getKey().getKey());
         System.err.print(" |-");
         for (int i = 0; i < 19; i++) {
             System.err.print("--");

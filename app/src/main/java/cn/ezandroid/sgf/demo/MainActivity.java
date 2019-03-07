@@ -7,6 +7,9 @@ import android.widget.Button;
 
 import java.io.IOException;
 
+import cn.ezandroid.ezpermission.EZPermission;
+import cn.ezandroid.ezpermission.Permission;
+import cn.ezandroid.ezpermission.PermissionCallback;
 import cn.ezandroid.lib.sgf.SGFException;
 import cn.ezandroid.lib.sgf.SGFLoader;
 
@@ -45,11 +48,17 @@ public class MainActivity extends Activity {
             }
         });
 
-        new Thread() {
-            public void run() {
-                loadRawSGF(R.raw.book);
+        EZPermission.permissions(new Permission(Permission.STORAGE)).apply(this, new PermissionCallback() {
+
+            @Override
+            public void onAllPermissionsGranted() {
+                new Thread() {
+                    public void run() {
+                        loadRawSGF(R.raw.b);
+                    }
+                }.start();
             }
-        }.start();
+        });
     }
 
     private void loadRawSGF(int id) {
@@ -58,7 +67,7 @@ public class MainActivity extends Activity {
             long time = System.currentTimeMillis();
             mViewer = new SGFGameViewer(loader.load(getResources().openRawResource(id)));
             runOnUiThread(this::updateVarButton);
-            Log.e("Main", "SGFLoader UseTime:" + (System.currentTimeMillis() - time));
+            Log.e("MainActivity", "SGFLoader UseTime:" + (System.currentTimeMillis() - time));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SGFException e) {
