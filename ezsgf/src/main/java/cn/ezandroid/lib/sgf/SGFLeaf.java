@@ -71,7 +71,7 @@ public final class SGFLeaf implements Serializable {
         return mTokens.listIterator();
     }
 
-    public int getTokensSize() {
+    public int getTokenCount() {
         return mTokens.size();
     }
 

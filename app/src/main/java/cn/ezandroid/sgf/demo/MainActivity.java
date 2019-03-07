@@ -47,13 +47,7 @@ public class MainActivity extends Activity {
 
         new Thread() {
             public void run() {
-//                    loadRawSGF(R.raw.simple);
-//                    loadRawSGF(R.raw.complex);
-//                    loadRawSGF(R.raw.sina);
-//                    loadRawSGF(R.raw.normal);
-//                    loadRawSGF(R.raw.normal2);
-                loadRawSGF(R.raw.normal3);
-//                    loadRawSGF(R.raw.alphago_opening_book);
+                loadRawSGF(R.raw.book);
             }
         }.start();
     }

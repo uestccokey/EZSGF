@@ -1,9 +1,12 @@
 package cn.ezandroid.sgf.demo;
 
+import android.util.Log;
 import android.util.Pair;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
@@ -46,8 +49,8 @@ public class SGFGameViewer {
         mTrees = mSGFTree.getListTrees();
         while (mSGFTree.getLeafCount() == 0) {
             mSGFTree = mTrees.next();
-            mTrees = mSGFTree.getListTrees();
         }
+        mTrees = mSGFTree.getListTrees();
         mLeaves = mSGFTree.getListLeaves();
 
         init();
@@ -88,7 +91,48 @@ public class SGFGameViewer {
         if (!isLegal()) {
             return false;
         }
-        return !mLeaves.hasNext() && mSGFTree.getVariationCount() > 0;
+        return !mLeaves.hasNext() && mSGFTree.getTreeCount() > 0;
+    }
+
+    /**
+     * 获取分支列表
+     *
+     * @return
+     */
+    public ListIterator<SGFTree> getListBranches() {
+        return mSGFTree.getNewListTrees();
+    }
+
+    /**
+     * 获取分支首步列表
+     *
+     * @return
+     */
+    public List<Point> getBranchesPoints() {
+        List<Point> branchesPoints = new ArrayList<>();
+        ListIterator<SGFTree> branches = getListBranches();
+        if (branches != null) {
+            while (branches.hasNext()) {
+                SGFTree tree = branches.next();
+                ListIterator<SGFLeaf> leaves = tree.getNewListLeaves();
+                if (leaves.hasNext()) {
+                    SGFLeaf leaf = leaves.next();
+                    ListIterator<SGFToken> tokens = leaf.getListTokens();
+                    while (tokens.hasNext()) {
+                        SGFToken token = tokens.next();
+                        if (token instanceof MoveToken) {
+                            Iterator<Point> points = ((PlacementListToken) token).getPoints();
+                            while (points.hasNext()) {
+                                Point point = points.next();
+                                branchesPoints.add(point);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return branchesPoints;
     }
 
     /**
@@ -105,9 +149,16 @@ public class SGFGameViewer {
                     mTrees.previous();
                 }
             }
+
             mSGFTree = mTrees.next();
             mTrees = mSGFTree.getListTrees();
             mLeaves = mSGFTree.getListLeaves();
+
+            Log.e("SGF", "switchNextBranch:" + mSGFTree.getLeafCount() + " " + mSGFTree.getTreeCount());
+//
+//            while (mLeaves.hasPrevious()) {
+//                mLeaves.previous();
+//            }
 
             redo();
         }
@@ -119,7 +170,7 @@ public class SGFGameViewer {
      *
      * @return
      */
-    public boolean switchMainBranch() {
+    private boolean switchMainBranch() {
         boolean switchable = isSwitchableBranch();
         if (switchable) {
             // 如果不是主分支则先回到主分支
@@ -131,12 +182,19 @@ public class SGFGameViewer {
             mTrees = mSGFTree.getListTrees();
             mLeaves = mSGFTree.getListLeaves();
 
+            Log.e("SGF", "switchMainBranch:" + mSGFTree.getLeafCount() + " " + mSGFTree.getTreeCount());
+//
+//            while (mLeaves.hasPrevious()) {
+//                mLeaves.previous();
+//            }
+
             redo();
         }
         return switchable;
     }
 
     private void undoToken(SGFToken token) {
+        Log.e("SGF", "undoToken:" + token);
         if (token instanceof PlacementListToken) {
             Iterator<Point> points = ((PlacementListToken) token).getPoints();
             while (points.hasNext()) {
@@ -206,13 +264,11 @@ public class SGFGameViewer {
             return false;
         }
         if (mLeaves.hasPrevious()) {
-            ListIterator<SGFToken> mTokens = mLeaves.previous().getListTokens();
-            while (mTokens.hasNext()) {
-                SGFToken token = mTokens.next();
+            ListIterator<SGFToken> tokens = mLeaves.previous().getListTokens();
+            while (tokens.hasNext()) {
+                SGFToken token = tokens.next();
                 undoToken(token);
             }
-            printBoard(mBoard);
-
             if (!mLeaves.hasPrevious()) {
                 SGFTree parent = mSGFTree.getParentTree();
                 if (parent != null) {
@@ -221,6 +277,10 @@ public class SGFGameViewer {
                     mLeaves = mSGFTree.getListLeaves();
                 }
             }
+
+            printBoard(mBoard);
+
+            Log.e("SGF", "undo:" + mLeaves.previousIndex() + " " + mSGFTree.getLeafCount() + " " + mSGFTree.getTreeCount());
             return true;
         } else {
             return false;
@@ -228,6 +288,7 @@ public class SGFGameViewer {
     }
 
     private void redoToken(SGFToken token) {
+        Log.e("SGF", "redoToken:" + token);
         if (token instanceof PlacementListToken) {
             Iterator<Point> points = ((PlacementListToken) token).getPoints();
             while (points.hasNext()) {
@@ -318,12 +379,15 @@ public class SGFGameViewer {
             return false;
         }
         if (mLeaves.hasNext()) {
-            ListIterator<SGFToken> mTokens = mLeaves.next().getListTokens();
-            while (mTokens.hasNext()) {
-                SGFToken token = mTokens.next();
+            ListIterator<SGFToken> tokens = mLeaves.next().getListTokens();
+            while (tokens.hasNext()) {
+                SGFToken token = tokens.next();
                 redoToken(token);
             }
+
             printBoard(mBoard);
+
+            Log.e("SGF", "redo:" + mLeaves.nextIndex() + " " + mSGFTree.getLeafCount() + " " + mSGFTree.getTreeCount());
         } else {
             switchMainBranch();
         }
@@ -331,6 +395,7 @@ public class SGFGameViewer {
     }
 
     private void printBoard(byte[] board) {
+        List<Point> points = getBranchesPoints();
         System.err.println("Board:");
         System.err.print(" |-");
         for (int i = 0; i < 19; i++) {
@@ -351,7 +416,15 @@ public class SGFGameViewer {
                     } else if (player == WHITE) {
                         System.err.print("W");
                     } else {
-                        System.err.print("+");
+                        if (points != null) {
+                            if (points.contains(new Point((byte) j, (byte) (i + 1)))) {
+                                System.err.print("#");
+                            } else {
+                                System.err.print("+");
+                            }
+                        } else {
+                            System.err.print("+");
+                        }
                     }
                     System.err.print(" ");
                 }

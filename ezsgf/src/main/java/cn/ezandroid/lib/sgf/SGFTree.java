@@ -77,7 +77,12 @@ public final class SGFTree implements Serializable {
         if (mLeavesIterator == null) {
             mLeavesIterator = mLeaves.listIterator();
         }
+
         return mLeavesIterator;
+    }
+
+    public ListIterator<SGFLeaf> getNewListLeaves() {
+        return mLeaves.listIterator();
     }
 
     public void setParentTree(SGFTree parentTree) {
@@ -111,7 +116,7 @@ public final class SGFTree implements Serializable {
      *
      * @return The variations at this level of the game tree.
      */
-    public int getVariationCount() {
+    public int getTreeCount() {
         return mVariations.size();
     }
 
@@ -141,6 +146,10 @@ public final class SGFTree implements Serializable {
             mVariationIterator = mVariations.listIterator();
         }
         return mVariationIterator;
+    }
+
+    public ListIterator<SGFTree> getNewListTrees() {
+        return mVariations.listIterator();
     }
 }
 
