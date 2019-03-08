@@ -19,7 +19,7 @@ public class HashKey implements Serializable {
     }
 
     public HashKey(Long key) {
-        this.mKey = key;
+        mKey = key;
     }
 
     public HashKey(HashKey key) {
@@ -36,7 +36,7 @@ public class HashKey implements Serializable {
     }
 
     public boolean matches(Long key) {
-        return this.mKey.equals(key);
+        return mKey.equals(key);
     }
 
     public Long getKey() {

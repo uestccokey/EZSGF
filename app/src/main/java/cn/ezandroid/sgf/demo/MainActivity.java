@@ -11,6 +11,7 @@ import cn.ezandroid.ezpermission.EZPermission;
 import cn.ezandroid.ezpermission.Permission;
 import cn.ezandroid.ezpermission.PermissionCallback;
 import cn.ezandroid.lib.sgf.SGFException;
+import cn.ezandroid.lib.sgf.SGFGame;
 import cn.ezandroid.lib.sgf.SGFLoader;
 
 public class MainActivity extends Activity {
@@ -65,9 +66,19 @@ public class MainActivity extends Activity {
         SGFLoader loader = new SGFLoader();
         try {
             long time = System.currentTimeMillis();
-            mViewer = new SGFGameViewer(loader.load(getResources().openRawResource(id)));
+
+            SGFGame game = loader.load(getResources().openRawResource(id));
+            Log.e("MainActivity", "Load SGF UseTime:" + (System.currentTimeMillis() - time));
+            time = System.currentTimeMillis();
+
+            ZobristHash hash = ZobristHashHelper.common(this);
+            Log.e("MainActivity", "Load Hash UseTime:" + (System.currentTimeMillis() - time));
+            time = System.currentTimeMillis();
+
+            mViewer = new SGFGameViewer(game, hash);
+            Log.e("MainActivity", "Init Viewer UseTime:" + (System.currentTimeMillis() - time));
+
             runOnUiThread(this::updateVarButton);
-            Log.e("MainActivity", "SGFLoader UseTime:" + (System.currentTimeMillis() - time));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (SGFException e) {

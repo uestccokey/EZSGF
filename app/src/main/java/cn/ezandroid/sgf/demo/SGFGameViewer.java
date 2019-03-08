@@ -45,10 +45,10 @@ public class SGFGameViewer {
 
     private int mBoardSize = 19;
 
-    public SGFGameViewer(SGFGame game) {
+    public SGFGameViewer(SGFGame game, ZobristHash hash) {
         mBoard = new byte[mBoardSize * mBoardSize];
         mGame = new Game(mBoardSize);
-        mHash = new ZobristHash(mGame);
+        mHash = hash;
         mSGFTree = game.getTree();
         mTrees = mSGFTree.getListTrees();
         while (mSGFTree.getLeafCount() == 0) {
@@ -441,19 +441,19 @@ public class SGFGameViewer {
         List<Point> points = getBranchesPoints();
         System.err.println("Board:" + mHash.getKey().getKey());
         System.err.print(" |-");
-        for (int i = 0; i < 19; i++) {
+        for (int i = 0; i < mBoardSize; i++) {
             System.err.print("--");
         }
         System.err.print("|");
         System.err.println();
-        for (int i = 0; i < 19; i++) {
-            for (int j = 0; j < 21; j++) {
+        for (int i = 0; i < mBoardSize; i++) {
+            for (int j = 0; j < mBoardSize + 1 + 1; j++) {
                 if (j == 0) {
                     System.err.print(((i + 1) % 10) + "| ");
-                } else if (j == 20) {
+                } else if (j == mBoardSize + 1) {
                     System.err.print("| ");
                 } else {
-                    int player = board[i * 19 + (j - 1)];
+                    int player = board[i * mBoardSize + (j - 1)];
                     if (player == BLACK) {
                         System.err.print("B");
                     } else if (player == WHITE) {
@@ -475,7 +475,7 @@ public class SGFGameViewer {
             System.err.println();
         }
         System.err.print(" |-");
-        for (int i = 0; i < 19; i++) {
+        for (int i = 0; i < mBoardSize; i++) {
             System.err.print("--");
         }
         System.err.print("|");
