@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
             public void onAllPermissionsGranted() {
                 new Thread() {
                     public void run() {
-                        loadRawSGF(R.raw.alphago_opening_book);
+                        loadRawSGF(R.raw.test);
                     }
                 }.start();
             }
@@ -77,6 +77,10 @@ public class MainActivity extends Activity {
 
             mViewer = new SGFGameViewer(game, hash);
             Log.e("MainActivity", "Init Viewer UseTime:" + (System.currentTimeMillis() - time));
+            time = System.currentTimeMillis();
+
+            mViewer.traverse();
+            Log.e("MainActivity", "Traverse SGF UseTime:" + (System.currentTimeMillis() - time));
 
             runOnUiThread(this::updateVarButton);
         } catch (IOException e) {

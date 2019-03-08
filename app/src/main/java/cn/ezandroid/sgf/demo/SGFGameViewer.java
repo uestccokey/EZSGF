@@ -52,14 +52,14 @@ public class SGFGameViewer {
         mGame = new Game(mBoardSize);
         mHash = hash;
         mSGFTree = game.getTree();
-        mTrees = mSGFTree.getListTrees();
-        while (mSGFTree.getLeafCount() == 0) {
-            mSGFTree = mTrees.next();
-        }
-        mTrees = mSGFTree.getListTrees();
-        mLeaves = mSGFTree.getListLeaves();
+//        mTrees = mSGFTree.getListTrees();
+//        while (mSGFTree.getLeafCount() == 0) {
+//            mSGFTree = mTrees.next();
+//        }
+//        mTrees = mSGFTree.getListTrees();
+//        mLeaves = mSGFTree.getListLeaves();
 
-        init();
+//        init();
     }
 
     private void init() {
@@ -71,6 +71,76 @@ public class SGFGameViewer {
             }
         }
         printBoard(mBoard);
+    }
+
+    /**
+     * 遍历所有节点
+     */
+    public void traverse() {
+        redoTraverse();
+        Log.e("SGFGameViewer", "总局面数:" + mOpeningBook.size() + " 总节点数:" + mTotalTokenCount);
+    }
+
+    private int mTotalTokenCount;
+
+    private void undoTraverse() {
+        Log.e("SGFGameViewer", "undoTraverse");
+        ListIterator<SGFToken> previousTokens;
+        while (mLeaves.hasPrevious()) {
+            SGFLeaf leaf = mLeaves.previous();
+            previousTokens = leaf.getListTokens();
+
+            while (previousTokens.hasNext()) {
+                SGFToken token = previousTokens.next();
+                undoToken(token);
+            }
+        }
+        printBoard(mBoard);
+
+        SGFTree parent = mSGFTree.getParentTree();
+        if (parent != null) {
+            mSGFTree = parent;
+            mTrees = mSGFTree.getListTrees();
+            mLeaves = mSGFTree.getListLeaves();
+        }
+
+        if (mTrees.hasNext()) {
+            // 有下一个分支切换到下一个分支
+            mSGFTree = mTrees.next();
+            redoTraverse();
+//        } else {
+//            // 没有下一个分支退出该级
+//            undoTraverse();
+        }
+    }
+
+    private void redoTraverse() {
+        Log.e("SGFGameViewer", "redoTraverse");
+        mTrees = mSGFTree.getListTrees();
+        mLeaves = mSGFTree.getListLeaves();
+
+        ListIterator<SGFToken> nextTokens;
+        while (mLeaves.hasNext()) {
+            SGFLeaf leaf = mLeaves.next();
+            nextTokens = leaf.getListTokens();
+
+            while (nextTokens.hasNext()) {
+                SGFToken token = nextTokens.next();
+                redoToken(token);
+                updateOpeningBook();
+                mTotalTokenCount++;
+            }
+        }
+        printBoard(mBoard);
+
+        if (mTrees.hasNext()) {
+            // 有下一级进入下一级
+            mSGFTree = mTrees.next();
+            redoTraverse();
+        } else {
+            // 没有下一级退出该级
+            undoTraverse();
+        }
     }
 
     /**
@@ -413,7 +483,6 @@ public class SGFGameViewer {
                 }
             }
         }
-        updateOpeningBook(); // 只需要在redoToken中添加更新开局库即可
 //        Log.e("SGFGameViewer", "redoToken:" + token + " " + mHash.getKey().getKey());
     }
 
@@ -444,23 +513,17 @@ public class SGFGameViewer {
         if (mLeaves.hasNext()) {
             // 使用下一步棋作为对于当前局面的预测记录到开局库中
             long hash = mHash.getKey().getKey();
-            boolean isBlack = false;
-            Move move = mGame.getCurrentMove();
-            if (move != null) {
-                isBlack = move.getStone().color == StoneColor.BLACK;
-            }
             SGFLeaf leaf = mLeaves.next();
             ListIterator<SGFToken> tokens = leaf.getListTokens();
             while (tokens.hasNext()) {
                 SGFToken token = tokens.next();
                 if (token instanceof MoveToken) {
-                    if (((MoveToken) token).isBlack() != isBlack) {
-                        Iterator<Point> points = ((PlacementListToken) token).getPoints();
-                        while (points.hasNext()) {
-                            Point point = points.next();
-                            int position = (point.x - 1) + mBoardSize * (point.y - 1);
-                            mOpeningBook.add(hash, new OpeningBook.Forecast((short) position, ""));
-                        }
+                    Iterator<Point> points = ((PlacementListToken) token).getPoints();
+                    while (points.hasNext()) {
+                        Point point = points.next();
+                        int position = (point.x - 1) + mBoardSize * (point.y - 1);
+                        mOpeningBook.add(hash, new OpeningBook.Forecast((short) position, ""));
+                        Log.e("SGFGameViewer", hash + "->(" + (point.x - 1) + ", " + (point.y - 1) + ")");
                     }
                     break;
                 }
@@ -469,7 +532,7 @@ public class SGFGameViewer {
             if (mLeaves.hasPrevious()) {
                 mLeaves.previous();
             }
-            Log.e("SGFGameViewer", "局面数:" + mOpeningBook.size() + " 手数:" + (mGame.getHistory().size() + 1));
+            Log.e("SGFGameViewer", "局面数:" + mOpeningBook.size());
         }
     }
 
