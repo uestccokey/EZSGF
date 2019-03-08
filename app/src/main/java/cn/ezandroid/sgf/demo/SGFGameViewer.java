@@ -45,6 +45,8 @@ public class SGFGameViewer {
 
     private int mBoardSize = 19;
 
+    private OpeningBook mOpeningBook = new OpeningBook();
+
     public SGFGameViewer(SGFGame game, ZobristHash hash) {
         mBoard = new byte[mBoardSize * mBoardSize];
         mGame = new Game(mBoardSize);
@@ -276,7 +278,7 @@ public class SGFGameViewer {
                 }
             }
         }
-        Log.e("SGFGameViewer", "undoToken:" + token + " " + mHash.getKey().getKey());
+//        Log.e("SGFGameViewer", "undoToken:" + token + " " + mHash.getKey().getKey());
     }
 
     /**
@@ -411,7 +413,8 @@ public class SGFGameViewer {
                 }
             }
         }
-        Log.e("SGFGameViewer", "redoToken:" + token + " " + mHash.getKey().getKey());
+        updateOpeningBook(); // 只需要在redoToken中添加更新开局库即可
+//        Log.e("SGFGameViewer", "redoToken:" + token + " " + mHash.getKey().getKey());
     }
 
     /**
@@ -435,6 +438,39 @@ public class SGFGameViewer {
             switchMainBranch();
         }
         return true;
+    }
+
+    private void updateOpeningBook() {
+        if (mLeaves.hasNext()) {
+            // 使用下一步棋作为对于当前局面的预测记录到开局库中
+            long hash = mHash.getKey().getKey();
+            boolean isBlack = false;
+            Move move = mGame.getCurrentMove();
+            if (move != null) {
+                isBlack = move.getStone().color == StoneColor.BLACK;
+            }
+            SGFLeaf leaf = mLeaves.next();
+            ListIterator<SGFToken> tokens = leaf.getListTokens();
+            while (tokens.hasNext()) {
+                SGFToken token = tokens.next();
+                if (token instanceof MoveToken) {
+                    if (((MoveToken) token).isBlack() != isBlack) {
+                        Iterator<Point> points = ((PlacementListToken) token).getPoints();
+                        while (points.hasNext()) {
+                            Point point = points.next();
+                            int position = (point.x - 1) + mBoardSize * (point.y - 1);
+                            mOpeningBook.add(hash, new OpeningBook.Forecast((short) position, ""));
+                        }
+                    }
+                    break;
+                }
+            }
+            // 还原
+            if (mLeaves.hasPrevious()) {
+                mLeaves.previous();
+            }
+            Log.e("SGFGameViewer", "局面数:" + mOpeningBook.size() + " 手数:" + (mGame.getHistory().size() + 1));
+        }
     }
 
     private void printBoard(byte[] board) {

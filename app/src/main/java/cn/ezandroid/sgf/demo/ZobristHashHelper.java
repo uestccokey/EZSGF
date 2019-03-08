@@ -25,6 +25,12 @@ public class ZobristHashHelper {
 
     private static volatile ZobristHash COMMON;
 
+    /**
+     * 读取文件创建哈希表
+     *
+     * @param file
+     * @return
+     */
     public static ZobristHash create(File file) {
         try {
             return readZobristHash(new FileInputStream(file));
@@ -34,6 +40,12 @@ public class ZobristHashHelper {
         return null;
     }
 
+    /**
+     * 获取通用哈希表
+     *
+     * @param context
+     * @return
+     */
     public static ZobristHash common(Context context) {
         if (COMMON == null) {
             synchronized (ZobristHash.class) {
@@ -42,7 +54,7 @@ public class ZobristHashHelper {
                 }
             }
         }
-        return COMMON;
+        return new ZobristHash(COMMON.getPassHash(), COMMON.getBoardHashTable());
     }
 
     public static ZobristHash readZobristHash(InputStream fis) {
@@ -143,7 +155,7 @@ public class ZobristHashHelper {
             dos.writeByte(0);
             // 写入棋盘尺寸
             dos.writeByte(boardSize);
-            // 写入其他信息
+            // 写入其他信息 比如作者名称，文件版本，作者邮箱等
             dos.writeUTF("uestccokey@gmail.com");
             // 写入Pass的Hash值
             dos.writeLong(passHash);

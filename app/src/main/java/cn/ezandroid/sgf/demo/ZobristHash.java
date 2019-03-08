@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.Random;
 
 /**
- * Zobrist Hash表
+ * Zobrist哈希表
  * <p>
  * 实现了棋盘的每个状态都有一个唯一的Hash值
  * 参见 http://en.wikipedia.org/wiki/Zobrist_hashing
