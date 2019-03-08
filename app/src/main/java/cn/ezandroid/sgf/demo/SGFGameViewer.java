@@ -86,16 +86,6 @@ public class SGFGameViewer {
         return mLeaves != null;
     }
 
-    private int getStateIndex(int index) {
-        switch (mBoard[index]) {
-            case ZobristHash.STATE_BLACK:
-                return 1;
-            case ZobristHash.STATE_WHITE:
-                return 2;
-        }
-        return 0;
-    }
-
     /**
      * 当前状态是否可切换分支
      *
@@ -201,6 +191,22 @@ public class SGFGameViewer {
             redo();
         }
         return switchable;
+    }
+
+    /**
+     * 获取指定位置的状态序号
+     *
+     * @param index
+     * @return
+     */
+    private int getStateIndex(int index) {
+        switch (mBoard[index]) {
+            case BLACK:
+                return ZobristHash.STATE_BLACK;
+            case WHITE:
+                return ZobristHash.STATE_WHITE;
+        }
+        return ZobristHash.STATE_EMPTY;
     }
 
     private void undoToken(SGFToken token) {
