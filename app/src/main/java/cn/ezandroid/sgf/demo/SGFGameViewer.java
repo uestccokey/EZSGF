@@ -84,8 +84,7 @@ public class SGFGameViewer {
     public void traverse() {
         redoTraverse();
         Log.e("SGFGameViewer", "总局面数:" + mOpeningBook.size());
-        OpeningBookHelper.writeOpeningBook(new File(Environment.getExternalStorageDirectory().toString(), "Open.ob"),
-                (byte) mBoardSize, mOpeningBook);
+        OpeningBookHelper.writeOpeningBook(new File(Environment.getExternalStorageDirectory().toString(), "Open.ob"), mOpeningBook);
     }
 
     private void undoTraverse() {

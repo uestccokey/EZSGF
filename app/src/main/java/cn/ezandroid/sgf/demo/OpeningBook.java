@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 开局库
@@ -21,6 +20,17 @@ public class OpeningBook implements Serializable {
 
     @SuppressLint("UseSparseArrays")
     private Map<Long, List<Forecast>> mBookTable = new HashMap<>();
+
+    private byte mBoardSize;
+
+    public OpeningBook(byte boardSize) {
+        mBoardSize = boardSize;
+    }
+
+    public OpeningBook(byte boardSize, Map<Long, List<Forecast>> table) {
+        mBoardSize = boardSize;
+        mBookTable.putAll(table);
+    }
 
     /**
      * 对于某个局面的落子预测
@@ -97,7 +107,11 @@ public class OpeningBook implements Serializable {
         return mBookTable.size();
     }
 
-    Set<Map.Entry<Long, List<Forecast>>> entrySet() {
-        return mBookTable.entrySet();
+    public byte getBoardSize() {
+        return mBoardSize;
+    }
+
+    Map<Long, List<Forecast>> getBookTable() {
+        return mBookTable;
     }
 }

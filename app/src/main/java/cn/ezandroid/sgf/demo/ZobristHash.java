@@ -27,31 +27,42 @@ public final class ZobristHash implements Serializable {
 
     private HashKey mCurrentKey;
 
-    public ZobristHash(long passHash, long[][][] boardHashTable) {
+    private byte mBoardSize;
+
+    public ZobristHash(byte boardSize) {
+        mBoardSize = boardSize;
+        initZobristHash(mBoardSize);
+        mCurrentKey = new HashKey();
+    }
+
+    public ZobristHash(byte boardSize, long passHash, long[][][] boardHashTable) {
+        mBoardSize = boardSize;
         mPassHash = passHash;
         mBoardHashTable = boardHashTable;
         mCurrentKey = new HashKey();
     }
 
-    public ZobristHash(HashKey hashKey, long passHash, long[][][] boardHashTable) {
+    public ZobristHash(byte boardSize, long passHash, long[][][] boardHashTable, HashKey hashKey) {
+        mBoardSize = boardSize;
         mPassHash = passHash;
         mBoardHashTable = boardHashTable;
         mCurrentKey = hashKey;
     }
 
     public ZobristHash(Game board) {
-        initZobristHash(board);
+        mBoardSize = (byte) board.getBoardSize();
+        initZobristHash(mBoardSize);
         mCurrentKey = getInitialKey(board);
     }
 
     public ZobristHash(Game board, long passHash, long[][][] boardHashTable) {
+        mBoardSize = (byte) board.getBoardSize();
         mPassHash = passHash;
         mBoardHashTable = boardHashTable;
         mCurrentKey = getInitialKey(board);
     }
 
-    private void initZobristHash(Game board) {
-        int boardSize = board.getBoardSize();
+    private void initZobristHash(int boardSize) {
         int positionStateCount = getPositionStateCount();
         Random random = new Random(0);
         mPassHash = random.nextLong();
@@ -118,6 +129,10 @@ public final class ZobristHash implements Serializable {
      */
     public HashKey getKey() {
         return mCurrentKey;
+    }
+
+    public byte getBoardSize() {
+        return mBoardSize;
     }
 
     public void applyMove(int x, int y, int stateIndex) {

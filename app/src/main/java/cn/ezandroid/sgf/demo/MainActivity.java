@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 
 import cn.ezandroid.ezpermission.EZPermission;
@@ -76,7 +75,7 @@ public class MainActivity extends Activity {
             Log.e("MainActivity", "Load Hash UseTime:" + (System.currentTimeMillis() - time));
             time = System.currentTimeMillis();
 
-            OpeningBook book = OpeningBookHelper.readOpeningBook(new BufferedInputStream(getResources().openRawResource(R.raw.default_opening_book)));
+            OpeningBook book = OpeningBookHelper.common(this);
             Log.e("MainActivity", "Load Book UseTime:" + (System.currentTimeMillis() - time));
             time = System.currentTimeMillis();
 

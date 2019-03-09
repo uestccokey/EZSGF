@@ -54,7 +54,11 @@ public class ZobristHashHelper {
                 }
             }
         }
-        return new ZobristHash(COMMON.getPassHash(), COMMON.getBoardHashTable());
+        if (COMMON == null) {
+            return new ZobristHash((byte) 19);
+        } else {
+            return new ZobristHash(COMMON.getBoardSize(), COMMON.getPassHash(), COMMON.getBoardHashTable());
+        }
     }
 
     public static ZobristHash readZobristHash(InputStream fis) {
@@ -103,7 +107,7 @@ public class ZobristHashHelper {
                     }
                 }
             }
-            hash = new ZobristHash(passHash, boardHashTable);
+            hash = new ZobristHash(boardSize, passHash, boardHashTable);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -125,10 +129,11 @@ public class ZobristHashHelper {
         return hash;
     }
 
-    public static void writeZobristHash(File file, byte boardSize, ZobristHash hash) {
+    public static void writeZobristHash(File file, ZobristHash hash) {
         FileOutputStream fos = null;
         DataOutputStream dos = null;
         try {
+            byte boardSize = hash.getBoardSize();
             long passHash = hash.getPassHash();
             long[][][] boardHashTable = hash.getBoardHashTable();
             int positionStateCount = ZobristHash.getPositionStateCount();
