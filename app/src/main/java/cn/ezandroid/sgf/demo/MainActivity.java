@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
             public void onAllPermissionsGranted() {
                 new Thread() {
                     public void run() {
-                        loadRawSGF(R.raw.book8117);
+                        loadRawSGF(R.raw.simple);
                     }
                 }.start();
             }
@@ -83,7 +83,7 @@ public class MainActivity extends Activity {
             Log.e("MainActivity", "Init Viewer UseTime:" + (System.currentTimeMillis() - time));
             time = System.currentTimeMillis();
 
-//            mViewer.traverse();
+//            mViewer.writeOpeningBook(false);
 //            Log.e("MainActivity", "Traverse SGF UseTime:" + (System.currentTimeMillis() - time));
 
             mViewer.start();

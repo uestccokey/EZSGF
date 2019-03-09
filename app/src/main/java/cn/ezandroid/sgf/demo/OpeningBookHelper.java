@@ -132,7 +132,7 @@ public class OpeningBookHelper {
                 Long key = entry.getKey();
                 List<OpeningBook.Forecast> forecasts = entry.getValue();
                 dos.writeLong(key);
-                dos.writeByte(forecasts.size());
+                dos.writeByte(forecasts.size()); // 对一个局面的预测落子应该不超过127个
                 for (OpeningBook.Forecast forecast : forecasts) {
                     dos.writeShort(forecast.getPosition());
                     dos.writeUTF(forecast.getInfo());

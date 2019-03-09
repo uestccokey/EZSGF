@@ -69,22 +69,30 @@ public class SGFGameViewer {
         mLeaves = mSGFTree.getListLeaves();
 
         while (mLeaves.hasNext()) {
-            ListIterator<SGFToken> mTokens = mLeaves.next().getListTokens();
-            while (mTokens.hasNext()) {
-                SGFToken token = mTokens.next();
+            ListIterator<SGFToken> tokens = mLeaves.next().getListTokens();
+            while (tokens.hasNext()) {
+                SGFToken token = tokens.next();
                 redoToken(token);
             }
+
+            printBoard(mBoard);
         }
-        printBoard(mBoard);
     }
 
     /**
-     * 遍历所有节点
+     * 遍历所有节点，生成开局库文件
+     *
+     * @param append
      */
-    public void traverse() {
+    public void writeOpeningBook(boolean append) {
+        if (!append) {
+            mOpeningBook = new OpeningBook((byte) mBoardSize);
+        }
+
         redoTraverse();
+
         Log.e("SGFGameViewer", "总局面数:" + mOpeningBook.size());
-        OpeningBookHelper.writeOpeningBook(new File(Environment.getExternalStorageDirectory().toString(), "Open.ob"), mOpeningBook);
+        OpeningBookHelper.writeOpeningBook(new File(Environment.getExternalStorageDirectory().toString(), "OpeningBook.ob"), mOpeningBook);
     }
 
     private void undoTraverse() {
@@ -545,8 +553,19 @@ public class SGFGameViewer {
     }
 
     private void printBoard(byte[] board) {
+        long hash = mHash.getKey().getKey();
+        List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
+        if (forecasts != null) {
+            for (OpeningBook.Forecast forecast : forecasts) {
+                short position = forecast.getPosition();
+                int x = position % mBoardSize;
+                int y = position / mBoardSize;
+                Log.e("SGFGameViewer", hash + " -> (" + x + "," + y + ")");
+            }
+        }
+
         List<Point> points = getBranchesPoints();
-        System.err.println("Board:" + mHash.getKey().getKey());
+        System.err.println("Board:" + hash);
         System.err.print(" |-");
         for (int i = 0; i < mBoardSize; i++) {
             System.err.print("--");
