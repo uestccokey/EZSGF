@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 
 import cn.ezandroid.ezpermission.EZPermission;
@@ -55,7 +56,7 @@ public class MainActivity extends Activity {
             public void onAllPermissionsGranted() {
                 new Thread() {
                     public void run() {
-                        loadRawSGF(R.raw.test);
+                        loadRawSGF(R.raw.book8117);
                     }
                 }.start();
             }
@@ -75,12 +76,19 @@ public class MainActivity extends Activity {
             Log.e("MainActivity", "Load Hash UseTime:" + (System.currentTimeMillis() - time));
             time = System.currentTimeMillis();
 
-            mViewer = new SGFGameViewer(game, hash);
+            OpeningBook book = OpeningBookHelper.readOpeningBook(new BufferedInputStream(getResources().openRawResource(R.raw.default_opening_book)));
+            Log.e("MainActivity", "Load Book UseTime:" + (System.currentTimeMillis() - time));
+            time = System.currentTimeMillis();
+
+            mViewer = new SGFGameViewer(game, hash, book);
             Log.e("MainActivity", "Init Viewer UseTime:" + (System.currentTimeMillis() - time));
             time = System.currentTimeMillis();
 
-            mViewer.traverse();
-            Log.e("MainActivity", "Traverse SGF UseTime:" + (System.currentTimeMillis() - time));
+//            mViewer.traverse();
+//            Log.e("MainActivity", "Traverse SGF UseTime:" + (System.currentTimeMillis() - time));
+
+            mViewer.start();
+            Log.e("MainActivity", "Start Viewer UseTime:" + (System.currentTimeMillis() - time));
 
             runOnUiThread(this::updateVarButton);
         } catch (IOException e) {

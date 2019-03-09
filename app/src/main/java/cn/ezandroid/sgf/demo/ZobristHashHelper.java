@@ -50,7 +50,7 @@ public class ZobristHashHelper {
         if (COMMON == null) {
             synchronized (ZobristHash.class) {
                 if (COMMON == null) {
-                    COMMON = readZobristHash(new BufferedInputStream(context.getResources().openRawResource(R.raw.common)));
+                    COMMON = readZobristHash(new BufferedInputStream(context.getResources().openRawResource(R.raw.default_zobrist_hash)));
                 }
             }
         }
@@ -156,7 +156,7 @@ public class ZobristHashHelper {
             // 写入棋盘尺寸
             dos.writeByte(boardSize);
             // 写入其他信息 比如作者名称，文件版本，作者邮箱等
-            dos.writeUTF("uestccokey@gmail.com");
+            dos.writeUTF("AhQGo");
             // 写入Pass的Hash值
             dos.writeLong(passHash);
             // 写入棋盘的Hash表

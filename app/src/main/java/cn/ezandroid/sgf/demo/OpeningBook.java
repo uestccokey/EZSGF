@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 开局库
@@ -94,5 +95,9 @@ public class OpeningBook implements Serializable {
      */
     public int size() {
         return mBookTable.size();
+    }
+
+    Set<Map.Entry<Long, List<Forecast>>> entrySet() {
+        return mBookTable.entrySet();
     }
 }

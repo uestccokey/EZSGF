@@ -1,8 +1,10 @@
 package cn.ezandroid.sgf.demo;
 
+import android.os.Environment;
 import android.util.Log;
 import android.util.Pair;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,7 +26,7 @@ import cn.ezandroid.lib.sgf.tokens.SGFToken;
 import cn.ezandroid.lib.sgf.tokens.WhiteMoveToken;
 
 /**
- * SGFGameViewer
+ * SGF对局查看器
  *
  * @author like
  * @date 2019-03-06
@@ -45,24 +47,27 @@ public class SGFGameViewer {
 
     private int mBoardSize = 19;
 
-    private OpeningBook mOpeningBook = new OpeningBook();
+    private OpeningBook mOpeningBook;
 
-    public SGFGameViewer(SGFGame game, ZobristHash hash) {
+    public SGFGameViewer(SGFGame game, ZobristHash hash, OpeningBook book) {
         mBoard = new byte[mBoardSize * mBoardSize];
         mGame = new Game(mBoardSize);
         mHash = hash;
+        mOpeningBook = book;
         mSGFTree = game.getTree();
-//        mTrees = mSGFTree.getListTrees();
-//        while (mSGFTree.getLeafCount() == 0) {
-//            mSGFTree = mTrees.next();
-//        }
-//        mTrees = mSGFTree.getListTrees();
-//        mLeaves = mSGFTree.getListLeaves();
-
-//        init();
     }
 
-    private void init() {
+    /**
+     * 开始浏览
+     */
+    public void start() {
+        mTrees = mSGFTree.getListTrees();
+        while (mSGFTree.getLeafCount() == 0) {
+            mSGFTree = mTrees.next();
+        }
+        mTrees = mSGFTree.getListTrees();
+        mLeaves = mSGFTree.getListLeaves();
+
         while (mLeaves.hasNext()) {
             ListIterator<SGFToken> mTokens = mLeaves.next().getListTokens();
             while (mTokens.hasNext()) {
@@ -78,13 +83,13 @@ public class SGFGameViewer {
      */
     public void traverse() {
         redoTraverse();
-        Log.e("SGFGameViewer", "总局面数:" + mOpeningBook.size() + " 总节点数:" + mTotalTokenCount);
+        Log.e("SGFGameViewer", "总局面数:" + mOpeningBook.size());
+        OpeningBookHelper.writeOpeningBook(new File(Environment.getExternalStorageDirectory().toString(), "Open.ob"),
+                (byte) mBoardSize, mOpeningBook);
     }
 
-    private int mTotalTokenCount;
-
     private void undoTraverse() {
-        Log.e("SGFGameViewer", "undoTraverse");
+//        Log.e("SGFGameViewer", "undoTraverse");
         ListIterator<SGFToken> previousTokens;
         while (mLeaves.hasPrevious()) {
             SGFLeaf leaf = mLeaves.previous();
@@ -95,27 +100,27 @@ public class SGFGameViewer {
                 undoToken(token);
             }
         }
-        printBoard(mBoard);
+//        printBoard(mBoard);
 
         SGFTree parent = mSGFTree.getParentTree();
         if (parent != null) {
             mSGFTree = parent;
             mTrees = mSGFTree.getListTrees();
             mLeaves = mSGFTree.getListLeaves();
-        }
 
-        if (mTrees.hasNext()) {
-            // 有下一个分支切换到下一个分支
-            mSGFTree = mTrees.next();
-            redoTraverse();
-//        } else {
-//            // 没有下一个分支退出该级
-//            undoTraverse();
+            if (mTrees.hasNext()) {
+                // 有下一个分支切换到下一个分支
+                mSGFTree = mTrees.next();
+                redoTraverse();
+            } else {
+                // 没有下一个分支退出该级
+                undoTraverse();
+            }
         }
     }
 
     private void redoTraverse() {
-        Log.e("SGFGameViewer", "redoTraverse");
+//        Log.e("SGFGameViewer", "redoTraverse");
         mTrees = mSGFTree.getListTrees();
         mLeaves = mSGFTree.getListLeaves();
 
@@ -126,12 +131,13 @@ public class SGFGameViewer {
 
             while (nextTokens.hasNext()) {
                 SGFToken token = nextTokens.next();
-                redoToken(token);
-                updateOpeningBook();
-                mTotalTokenCount++;
+                boolean isPlayMove = redoToken(token);
+                if (isPlayMove) {
+                    updateOpeningBook();
+                }
             }
         }
-        printBoard(mBoard);
+//        printBoard(mBoard);
 
         if (mTrees.hasNext()) {
             // 有下一级进入下一级
@@ -149,13 +155,7 @@ public class SGFGameViewer {
      * @return
      */
     public boolean isLegal() {
-        if (mTrees == null) {
-            return false;
-        }
-        if (mSGFTree == null) {
-            return false;
-        }
-        return mLeaves != null;
+        return mTrees != null && mLeaves != null;
     }
 
     /**
@@ -281,7 +281,14 @@ public class SGFGameViewer {
         return ZobristHash.STATE_EMPTY;
     }
 
-    private void undoToken(SGFToken token) {
+    private boolean isPlayMoveToken(SGFToken token) {
+        return token instanceof MoveToken ||
+                token instanceof AddBlackToken ||
+                token instanceof AddWhiteToken ||
+                token instanceof AddEmptyToken;
+    }
+
+    private boolean undoToken(SGFToken token) {
         if (token instanceof PlacementListToken) {
             Iterator<Point> points = ((PlacementListToken) token).getPoints();
             while (points.hasNext()) {
@@ -349,6 +356,7 @@ public class SGFGameViewer {
             }
         }
 //        Log.e("SGFGameViewer", "undoToken:" + token + " " + mHash.getKey().getKey());
+        return isPlayMoveToken(token);
     }
 
     /**
@@ -382,7 +390,7 @@ public class SGFGameViewer {
         }
     }
 
-    private void redoToken(SGFToken token) {
+    private boolean redoToken(SGFToken token) {
         if (token instanceof PlacementListToken) {
             Iterator<Point> points = ((PlacementListToken) token).getPoints();
             while (points.hasNext()) {
@@ -484,6 +492,7 @@ public class SGFGameViewer {
             }
         }
 //        Log.e("SGFGameViewer", "redoToken:" + token + " " + mHash.getKey().getKey());
+        return isPlayMoveToken(token);
     }
 
     /**
