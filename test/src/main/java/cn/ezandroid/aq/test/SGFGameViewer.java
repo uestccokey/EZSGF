@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
+import cn.ezandroid.aq.android.Environment;
+import cn.ezandroid.aq.android.Log;
 import cn.ezandroid.aq.android.Pair;
 import cn.ezandroid.lib.sgf.Point;
 import cn.ezandroid.lib.sgf.SGFGame;
@@ -97,9 +99,9 @@ public class SGFGameViewer {
 
         redoTraverse();
 
-        System.out.println("总局面数:" + mOpeningBook.size());
-        OpeningBookHelper.writeOpeningBook(new File("/Users/like/SGF/app/src/main/res/raw/", "opening_book_" + mOpeningBook.size() + ".ob"),
-                mOpeningBook);
+        Log.e("SGFGameViewer", "总局面数:" + mOpeningBook.size());
+        OpeningBookHelper.writeOpeningBook(
+                new File(Environment.getExternalStorageDirectory().toString(), "opening_book_" + mOpeningBook.size() + ".ob"), mOpeningBook);
     }
 
     private void undoTraverse() {
@@ -581,7 +583,7 @@ public class SGFGameViewer {
                 short position = forecast.getPosition();
                 int x = position % mBoardSize;
                 int y = position / mBoardSize;
-                System.out.println(hash + " -> (" + x + "," + y + ")");
+                Log.e("SGFGameViewer", "当前局面Hash:" + hash + " 下一手:" + " -> (" + x + "," + y + ")");
             }
         }
 
@@ -606,12 +608,8 @@ public class SGFGameViewer {
                     } else if (player == WHITE) {
                         System.err.print("W");
                     } else {
-                        if (points != null) {
-                            if (points.contains(new Point((byte) j, (byte) (i + 1)))) {
-                                System.err.print("#");
-                            } else {
-                                System.err.print("+");
-                            }
+                        if (points.contains(new Point((byte) j, (byte) (i + 1)))) {
+                            System.err.print("#");
                         } else {
                             System.err.print("+");
                         }

@@ -20,8 +20,6 @@ public class ZobristHashHelper {
     private static final String MAGIC_HEAD = "ZH";
     private static final int MIN_BOARD_SIZE = 1;
 
-    private static volatile ZobristHash COMMON;
-
     /**
      * 读取文件创建哈希表
      *

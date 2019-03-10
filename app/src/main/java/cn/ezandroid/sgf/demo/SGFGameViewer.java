@@ -166,6 +166,55 @@ public class SGFGameViewer {
         }
     }
 
+    private void updateOpeningBook() {
+        updateOpeningBook(mSGFTree.getNewListTrees(mTrees.nextIndex()), mSGFTree.getNewListLeaves(mLeaves.nextIndex()));
+    }
+
+    private void updateOpeningBook(ListIterator<SGFTree> trees, ListIterator<SGFLeaf> leaves) {
+        long hash = mHash.getKey().getKey();
+        boolean findMove = false;
+        while (leaves.hasNext()) {
+            // 使用下一步棋作为对于当前局面的预测记录到开局库中
+            SGFLeaf leaf = leaves.next();
+            ListIterator<SGFToken> tokens = leaf.getListTokens();
+            while (tokens.hasNext()) {
+                SGFToken token = tokens.next();
+                if (token instanceof MoveToken) {
+                    Iterator<Point> points = ((PlacementListToken) token).getPoints();
+                    if (points.hasNext()) {
+                        Point point = points.next();
+                        int position = (point.x - 1) + mBoardSize * (point.y - 1);
+                        String info = ""; // TODO 暂时为空
+                        OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, info);
+                        List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
+                        if (forecasts != null) {
+                            if (forecasts.contains(forecast)) {
+                                forecasts.get(forecasts.indexOf(forecast)).appendInfo(forecast.getInfo());
+                            } else {
+                                mOpeningBook.add(hash, forecast);
+                            }
+                        } else {
+                            mOpeningBook.add(hash, forecast);
+                        }
+                        System.out.println(mOpeningBook.size() + ":" + hash + "->(" + (point.x - 1) + ", " + (point.y - 1) + ")" + token);
+                        findMove = true;
+                        break;
+                    }
+                }
+            }
+            if (findMove) {
+                break;
+            }
+        }
+        if (!findMove) {
+            while (trees.hasNext()) {
+                // 有下一级进入下一级
+                SGFTree nextTree = trees.next();
+                updateOpeningBook(nextTree.getNewListTrees(), nextTree.getNewListLeaves());
+            }
+        }
+    }
+
     /**
      * 当前状态是否可用
      *
@@ -525,55 +574,6 @@ public class SGFGameViewer {
             switchMainBranch();
         }
         return true;
-    }
-
-    private void updateOpeningBook() {
-        updateOpeningBook(mSGFTree.getNewListTrees(mTrees.nextIndex()), mSGFTree.getNewListLeaves(mLeaves.nextIndex()));
-    }
-
-    private void updateOpeningBook(ListIterator<SGFTree> trees, ListIterator<SGFLeaf> leaves) {
-        long hash = mHash.getKey().getKey();
-        boolean findMove = false;
-        while (leaves.hasNext()) {
-            // 使用下一步棋作为对于当前局面的预测记录到开局库中
-            SGFLeaf leaf = leaves.next();
-            ListIterator<SGFToken> tokens = leaf.getListTokens();
-            while (tokens.hasNext()) {
-                SGFToken token = tokens.next();
-                if (token instanceof MoveToken) {
-                    Iterator<Point> points = ((PlacementListToken) token).getPoints();
-                    if (points.hasNext()) {
-                        Point point = points.next();
-                        int position = (point.x - 1) + mBoardSize * (point.y - 1);
-                        String info = ""; // TODO 暂时为空
-                        OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, info);
-                        List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
-                        if (forecasts != null) {
-                            if (forecasts.contains(forecast)) {
-                                forecasts.get(forecasts.indexOf(forecast)).appendInfo(forecast.getInfo());
-                            } else {
-                                mOpeningBook.add(hash, forecast);
-                            }
-                        } else {
-                            mOpeningBook.add(hash, forecast);
-                        }
-                        System.out.println(mOpeningBook.size() + ":" + hash + "->(" + (point.x - 1) + ", " + (point.y - 1) + ")" + token);
-                        findMove = true;
-                        break;
-                    }
-                }
-            }
-            if (findMove) {
-                break;
-            }
-        }
-        if (!findMove) {
-            while (trees.hasNext()) {
-                // 有下一级进入下一级
-                SGFTree nextTree = trees.next();
-                updateOpeningBook(nextTree.getNewListTrees(), nextTree.getNewListLeaves());
-            }
-        }
     }
 
     private void printBoard(byte[] board) {

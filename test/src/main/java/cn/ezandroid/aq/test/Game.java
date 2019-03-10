@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import cn.ezandroid.aq.android.Log;
 import cn.ezandroid.aq.android.Pair;
 
 /**
@@ -245,7 +246,7 @@ public class Game implements Cloneable, Serializable {
             Chain chain = mFilled.get(stone.intersection);
             if (chain == null) {
 //                throw new IllegalStateException("Popped stone keyed to null chain");
-//                Log.e("Game", "Popped stone keyed to null chain");
+                Log.e("Game", "Popped stone keyed to null chain");
                 return null;
             }
 
