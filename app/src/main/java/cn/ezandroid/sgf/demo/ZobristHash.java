@@ -35,6 +35,12 @@ public final class ZobristHash implements Serializable {
         mCurrentKey = new HashKey();
     }
 
+    public ZobristHash(byte boardSize, HashKey hashKey) {
+        mBoardSize = boardSize;
+        initZobristHash(mBoardSize);
+        mCurrentKey = hashKey;
+    }
+
     public ZobristHash(byte boardSize, long passHash, long[][][] boardHashTable) {
         mBoardSize = boardSize;
         mPassHash = passHash;
@@ -78,6 +84,7 @@ public final class ZobristHash implements Serializable {
 
     private HashKey getInitialKey(Game board) {
         mCurrentKey = new HashKey();
+        // FIXME 无视了Pass着，需要考虑吗？
         int boardSize = board.getBoardSize();
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {

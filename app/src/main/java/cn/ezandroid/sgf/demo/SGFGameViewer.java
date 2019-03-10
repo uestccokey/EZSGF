@@ -579,16 +579,21 @@ public class SGFGameViewer {
     private void printBoard(byte[] board) {
         long hash = mHash.getKey().getKey();
         List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
+        List<Point> forecastsPoints = new ArrayList<>();
         if (forecasts != null) {
             for (OpeningBook.Forecast forecast : forecasts) {
                 short position = forecast.getPosition();
                 int x = position % mBoardSize;
                 int y = position / mBoardSize;
-                Log.e("SGFGameViewer", "当前局面Hash:" + hash + " 下一手:" + " -> (" + x + "," + y + ")");
+                Log.e("SGFGameViewer", "手数:" + mGame.getCurrentMoveNumber()
+                        + " 局面Hash:" + hash
+                        + " 下一手:" + " -> (" + x + "," + y + ")"
+                        + " " + forecast.getInfo());
+                forecastsPoints.add(new Point((byte) x, (byte) y));
             }
         }
 
-        List<Point> points = getBranchesPoints();
+        List<Point> branchesPoints = getBranchesPoints();
         System.err.println("Board:" + hash);
         System.err.print(" |-");
         for (int i = 0; i < mBoardSize; i++) {
@@ -609,8 +614,10 @@ public class SGFGameViewer {
                     } else if (player == WHITE) {
                         System.err.print("W");
                     } else {
-                        if (points.contains(new Point((byte) j, (byte) (i + 1)))) {
+                        if (forecastsPoints.contains(new Point((byte) (j - 1), (byte) (i)))) {
                             System.err.print("#");
+                        } else if (branchesPoints.contains(new Point((byte) j, (byte) (i + 1)))) {
+                            System.err.print("@");
                         } else {
                             System.err.print("+");
                         }
