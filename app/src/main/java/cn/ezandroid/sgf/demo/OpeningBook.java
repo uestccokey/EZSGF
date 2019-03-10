@@ -56,8 +56,10 @@ public class OpeningBook implements Serializable {
         }
 
         public void appendInfo(String info) {
-            mInfo.append("\n");
-            mInfo.append(info);
+            if (!mInfo.toString().contains(info)) {
+                mInfo.append("\n");
+                mInfo.append(info);
+            }
         }
 
         @Override

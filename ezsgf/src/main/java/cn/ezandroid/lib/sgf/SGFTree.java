@@ -85,6 +85,10 @@ public final class SGFTree implements Serializable {
         return mLeaves.listIterator();
     }
 
+    public ListIterator<SGFLeaf> getNewListLeaves(int index) {
+        return mLeaves.listIterator(index);
+    }
+
     public void setParentTree(SGFTree parentTree) {
         mParentTree = parentTree;
     }
@@ -150,6 +154,10 @@ public final class SGFTree implements Serializable {
 
     public ListIterator<SGFTree> getNewListTrees() {
         return mVariations.listIterator();
+    }
+
+    public ListIterator<SGFTree> getNewListTrees(int index) {
+        return mVariations.listIterator(index);
     }
 }
 

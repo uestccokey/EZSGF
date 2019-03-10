@@ -41,7 +41,7 @@ public class OpeningBookHelper {
         if (COMMON == null) {
             synchronized (OpeningBook.class) {
                 if (COMMON == null) {
-                    COMMON = readOpeningBook(new BufferedInputStream(context.getResources().openRawResource(R.raw.default_opening_book)));
+                    COMMON = readOpeningBook(new BufferedInputStream(context.getResources().openRawResource(R.raw.opening_book)));
                 }
             }
         }
@@ -124,7 +124,7 @@ public class OpeningBookHelper {
             // 写入棋盘尺寸
             dos.writeByte(book.getBoardSize());
             // 写入其他信息 比如作者名称，文件版本，作者邮箱等
-            dos.writeUTF("AhQGo2.7.0");
+            dos.writeUTF("AhQGo");
             // 写入局面的预测图
             dos.writeInt(book.size());
             Set<Map.Entry<Long, List<OpeningBook.Forecast>>> entrySet = book.getBookTable().entrySet();

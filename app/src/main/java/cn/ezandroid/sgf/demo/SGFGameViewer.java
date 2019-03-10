@@ -62,7 +62,7 @@ public class SGFGameViewer {
      */
     public void start() {
         mTrees = mSGFTree.getListTrees();
-        while (mSGFTree.getLeafCount() == 0) {
+        while (mSGFTree.getLeafCount() == 0 && mTrees.hasNext()) {
             mSGFTree = mTrees.next();
         }
         mTrees = mSGFTree.getListTrees();
@@ -89,10 +89,20 @@ public class SGFGameViewer {
             mOpeningBook = new OpeningBook((byte) mBoardSize);
         }
 
+        mTrees = mSGFTree.getListTrees();
+        while (mSGFTree.getLeafCount() == 0 && mTrees.hasNext()) {
+            mSGFTree = mTrees.next();
+        }
+        mTrees = mSGFTree.getListTrees();
+        mLeaves = mSGFTree.getListLeaves();
+
+        updateOpeningBook();
+
         redoTraverse();
 
         Log.e("SGFGameViewer", "总局面数:" + mOpeningBook.size());
-        OpeningBookHelper.writeOpeningBook(new File(Environment.getExternalStorageDirectory().toString(), "OpeningBook.ob"), mOpeningBook);
+        OpeningBookHelper.writeOpeningBook(
+                new File(Environment.getExternalStorageDirectory().toString(), "opening_book_" + mOpeningBook.size() + ".ob"), mOpeningBook);
     }
 
     private void undoTraverse() {
@@ -178,39 +188,31 @@ public class SGFGameViewer {
     }
 
     /**
-     * 获取分支列表
-     *
-     * @return
-     */
-    public ListIterator<SGFTree> getListBranches() {
-        return mSGFTree.getNewListTrees();
-    }
-
-    /**
      * 获取分支首步列表
      *
      * @return
      */
     public List<Point> getBranchesPoints() {
         List<Point> branchesPoints = new ArrayList<>();
-        ListIterator<SGFTree> branches = getListBranches();
-        if (branches != null) {
-            while (branches.hasNext()) {
-                SGFTree tree = branches.next();
-                ListIterator<SGFLeaf> leaves = tree.getNewListLeaves();
-                if (leaves.hasNext()) {
-                    SGFLeaf leaf = leaves.next();
-                    ListIterator<SGFToken> tokens = leaf.getListTokens();
-                    while (tokens.hasNext()) {
-                        SGFToken token = tokens.next();
-                        if (token instanceof MoveToken) {
-                            Iterator<Point> points = ((PlacementListToken) token).getPoints();
-                            while (points.hasNext()) {
-                                Point point = points.next();
-                                branchesPoints.add(point);
-                            }
-                            break;
+        if (!isSwitchableBranch()) {
+            return branchesPoints;
+        }
+        ListIterator<SGFTree> branches = mSGFTree.getNewListTrees();
+        while (branches.hasNext()) {
+            SGFTree tree = branches.next();
+            ListIterator<SGFLeaf> leaves = tree.getNewListLeaves();
+            if (leaves.hasNext()) {
+                SGFLeaf leaf = leaves.next();
+                ListIterator<SGFToken> tokens = leaf.getListTokens();
+                while (tokens.hasNext()) {
+                    SGFToken token = tokens.next();
+                    if (token instanceof MoveToken) {
+                        Iterator<Point> points = ((PlacementListToken) token).getPoints();
+                        while (points.hasNext()) {
+                            Point point = points.next();
+                            branchesPoints.add(point);
                         }
+                        break;
                     }
                 }
             }
@@ -526,10 +528,15 @@ public class SGFGameViewer {
     }
 
     private void updateOpeningBook() {
-        if (mLeaves.hasNext()) {
+        updateOpeningBook(mSGFTree.getNewListTrees(mTrees.nextIndex()), mSGFTree.getNewListLeaves(mLeaves.nextIndex()));
+    }
+
+    private void updateOpeningBook(ListIterator<SGFTree> trees, ListIterator<SGFLeaf> leaves) {
+        long hash = mHash.getKey().getKey();
+        boolean findMove = false;
+        while (leaves.hasNext()) {
             // 使用下一步棋作为对于当前局面的预测记录到开局库中
-            long hash = mHash.getKey().getKey();
-            SGFLeaf leaf = mLeaves.next();
+            SGFLeaf leaf = leaves.next();
             ListIterator<SGFToken> tokens = leaf.getListTokens();
             while (tokens.hasNext()) {
                 SGFToken token = tokens.next();
@@ -550,16 +557,22 @@ public class SGFGameViewer {
                         } else {
                             mOpeningBook.add(hash, forecast);
                         }
-                        Log.e("SGFGameViewer", hash + "->(" + (point.x - 1) + ", " + (point.y - 1) + ")");
+                        System.out.println(mOpeningBook.size() + ":" + hash + "->(" + (point.x - 1) + ", " + (point.y - 1) + ")" + token);
+                        findMove = true;
                         break;
                     }
                 }
             }
-            // 还原
-            if (mLeaves.hasPrevious()) {
-                mLeaves.previous();
+            if (findMove) {
+                break;
             }
-            Log.e("SGFGameViewer", "局面数:" + mOpeningBook.size());
+        }
+        if (!findMove) {
+            while (trees.hasNext()) {
+                // 有下一级进入下一级
+                SGFTree nextTree = trees.next();
+                updateOpeningBook(nextTree.getNewListTrees(), nextTree.getNewListLeaves());
+            }
         }
     }
 
@@ -571,7 +584,7 @@ public class SGFGameViewer {
                 short position = forecast.getPosition();
                 int x = position % mBoardSize;
                 int y = position / mBoardSize;
-                Log.e("SGFGameViewer", hash + " -> (" + x + "," + y + ")");
+                Log.e("SGFGameViewer", "当前局面Hash:" + hash + " 下一手:" + " -> (" + x + "," + y + ")");
             }
         }
 
@@ -596,12 +609,8 @@ public class SGFGameViewer {
                     } else if (player == WHITE) {
                         System.err.print("W");
                     } else {
-                        if (points != null) {
-                            if (points.contains(new Point((byte) j, (byte) (i + 1)))) {
-                                System.err.print("#");
-                            } else {
-                                System.err.print("+");
-                            }
+                        if (points.contains(new Point((byte) j, (byte) (i + 1)))) {
+                            System.err.print("#");
                         } else {
                             System.err.print("+");
                         }

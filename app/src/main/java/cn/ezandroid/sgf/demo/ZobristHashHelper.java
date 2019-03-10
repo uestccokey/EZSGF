@@ -50,7 +50,7 @@ public class ZobristHashHelper {
         if (COMMON == null) {
             synchronized (ZobristHash.class) {
                 if (COMMON == null) {
-                    COMMON = readZobristHash(new BufferedInputStream(context.getResources().openRawResource(R.raw.default_zobrist_hash)));
+                    COMMON = readZobristHash(new BufferedInputStream(context.getResources().openRawResource(R.raw.zobrist_hash)));
                 }
             }
         }
