@@ -40,11 +40,11 @@ public class OpeningBook implements Serializable {
         private static final long serialVersionUID = 42L;
 
         private short mPosition;
-        private String mInfo;
+        private StringBuilder mInfo = new StringBuilder();
 
         public Forecast(short position, String info) {
             mPosition = position;
-            mInfo = info;
+            mInfo.append(info);
         }
 
         public short getPosition() {
@@ -52,7 +52,27 @@ public class OpeningBook implements Serializable {
         }
 
         public String getInfo() {
-            return mInfo;
+            return mInfo.toString();
+        }
+
+        public void appendInfo(String info) {
+            mInfo.append("\n");
+            mInfo.append(info);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Forecast)) return false;
+
+            Forecast forecast = (Forecast) o;
+
+            return mPosition == forecast.mPosition;
+        }
+
+        @Override
+        public int hashCode() {
+            return (int) mPosition;
         }
     }
 

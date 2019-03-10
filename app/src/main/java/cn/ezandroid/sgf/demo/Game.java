@@ -1,5 +1,6 @@
 package cn.ezandroid.sgf.demo;
 
+import android.util.Log;
 import android.util.Pair;
 
 import java.io.Serializable;
@@ -244,7 +245,9 @@ public class Game implements Cloneable, Serializable {
             Set<Chain> captured = move.getCaptured();
             Chain chain = mFilled.get(stone.intersection);
             if (chain == null) {
-                throw new IllegalStateException("Popped stone keyed to null chain");
+//                throw new IllegalStateException("Popped stone keyed to null chain");
+                Log.e("Game", "Popped stone keyed to null chain");
+                return null;
             }
 
             // 邻接敌串气数增加

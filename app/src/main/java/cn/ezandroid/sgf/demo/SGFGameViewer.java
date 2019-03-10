@@ -535,13 +535,24 @@ public class SGFGameViewer {
                 SGFToken token = tokens.next();
                 if (token instanceof MoveToken) {
                     Iterator<Point> points = ((PlacementListToken) token).getPoints();
-                    while (points.hasNext()) {
+                    if (points.hasNext()) {
                         Point point = points.next();
                         int position = (point.x - 1) + mBoardSize * (point.y - 1);
-                        mOpeningBook.add(hash, new OpeningBook.Forecast((short) position, ""));
+                        String info = ""; // TODO 暂时为空
+                        OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, info);
+                        List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
+                        if (forecasts != null) {
+                            if (forecasts.contains(forecast)) {
+                                forecasts.get(forecasts.indexOf(forecast)).appendInfo(forecast.getInfo());
+                            } else {
+                                mOpeningBook.add(hash, forecast);
+                            }
+                        } else {
+                            mOpeningBook.add(hash, forecast);
+                        }
                         Log.e("SGFGameViewer", hash + "->(" + (point.x - 1) + ", " + (point.y - 1) + ")");
+                        break;
                     }
-                    break;
                 }
             }
             // 还原
