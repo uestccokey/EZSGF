@@ -41,7 +41,7 @@ public class OpeningBookHelper {
         if (COMMON == null) {
             synchronized (OpeningBook.class) {
                 if (COMMON == null) {
-                    COMMON = readOpeningBook(new BufferedInputStream(context.getResources().openRawResource(R.raw.opening_book)));
+                    COMMON = readOpeningBook(new BufferedInputStream(context.getResources().openRawResource(R.raw.opening_book_106182)));
                 }
             }
         }

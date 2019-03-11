@@ -231,7 +231,7 @@ public class SGFGameViewer {
                 } else {
                     mOpeningBook.add(hash, forecast);
                 }
-                System.out.println(mOpeningBook.size() + ":" + hash + "->(" + (point.x - 1) + ", " + (point.y - 1) + ")" + moveToken + " " + comment);
+                System.err.println(mOpeningBook.size() + ":" + hash + "->(" + (point.x - 1) + ", " + (point.y - 1) + ")" + moveToken + " " + comment);
             }
         } else {
             while (trees.hasNext()) {

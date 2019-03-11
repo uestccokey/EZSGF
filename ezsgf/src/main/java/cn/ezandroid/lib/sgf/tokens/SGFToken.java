@@ -56,7 +56,7 @@ public abstract class SGFToken implements Serializable {
         // not so simple.
         //
         st.wordChars((int) '(', (int) ')');
-//        st.eolIsSignificant(true);
+        st.eolIsSignificant(true);
 
         try {
             result = parseContent(st);
@@ -64,7 +64,7 @@ public abstract class SGFToken implements Serializable {
         }
 
         st.ordinaryChars((int) '(', (int) ')');
-//        st.eolIsSignificant(false);
+        st.eolIsSignificant(false);
 
         return result;
     }

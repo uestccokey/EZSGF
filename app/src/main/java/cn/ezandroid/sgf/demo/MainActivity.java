@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
             public void onAllPermissionsGranted() {
                 new Thread() {
                     public void run() {
-                        loadRawSGF(R.raw.book237);
+                        loadRawSGF(R.raw.v2);
                     }
                 }.start();
             }
