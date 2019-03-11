@@ -12,7 +12,7 @@ import java.util.Random;
  *
  * @author Barry Becker
  */
-public final class ZobristHash implements Serializable {
+public final class ZobristHash implements Cloneable, Serializable {
 
     private static final long serialVersionUID = 42L;
 
@@ -35,6 +35,12 @@ public final class ZobristHash implements Serializable {
         mCurrentKey = new HashKey();
     }
 
+    public ZobristHash(byte boardSize, HashKey hashKey) {
+        mBoardSize = boardSize;
+        initZobristHash(mBoardSize);
+        mCurrentKey = hashKey.copy();
+    }
+
     public ZobristHash(byte boardSize, long passHash, long[][][] boardHashTable) {
         mBoardSize = boardSize;
         mPassHash = passHash;
@@ -46,7 +52,7 @@ public final class ZobristHash implements Serializable {
         mBoardSize = boardSize;
         mPassHash = passHash;
         mBoardHashTable = boardHashTable;
-        mCurrentKey = hashKey;
+        mCurrentKey = hashKey.copy();
     }
 
     public ZobristHash(Game board) {
@@ -60,6 +66,11 @@ public final class ZobristHash implements Serializable {
         mPassHash = passHash;
         mBoardHashTable = boardHashTable;
         mCurrentKey = getInitialKey(board);
+    }
+
+    @Override
+    public ZobristHash clone() throws CloneNotSupportedException {
+        return new ZobristHash(mBoardSize, mPassHash, mBoardHashTable, mCurrentKey);
     }
 
     private void initZobristHash(int boardSize) {
@@ -78,6 +89,7 @@ public final class ZobristHash implements Serializable {
 
     private HashKey getInitialKey(Game board) {
         mCurrentKey = new HashKey();
+        // FIXME 无视了Pass着，需要考虑吗？
         int boardSize = board.getBoardSize();
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {

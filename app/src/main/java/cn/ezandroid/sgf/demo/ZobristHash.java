@@ -12,7 +12,7 @@ import java.util.Random;
  *
  * @author Barry Becker
  */
-public final class ZobristHash implements Serializable {
+public final class ZobristHash implements Cloneable, Serializable {
 
     private static final long serialVersionUID = 42L;
 
@@ -38,7 +38,7 @@ public final class ZobristHash implements Serializable {
     public ZobristHash(byte boardSize, HashKey hashKey) {
         mBoardSize = boardSize;
         initZobristHash(mBoardSize);
-        mCurrentKey = hashKey;
+        mCurrentKey = hashKey.copy();
     }
 
     public ZobristHash(byte boardSize, long passHash, long[][][] boardHashTable) {
@@ -52,7 +52,7 @@ public final class ZobristHash implements Serializable {
         mBoardSize = boardSize;
         mPassHash = passHash;
         mBoardHashTable = boardHashTable;
-        mCurrentKey = hashKey;
+        mCurrentKey = hashKey.copy();
     }
 
     public ZobristHash(Game board) {
@@ -66,6 +66,11 @@ public final class ZobristHash implements Serializable {
         mPassHash = passHash;
         mBoardHashTable = boardHashTable;
         mCurrentKey = getInitialKey(board);
+    }
+
+    @Override
+    public ZobristHash clone() throws CloneNotSupportedException {
+        return new ZobristHash(mBoardSize, mPassHash, mBoardHashTable, mCurrentKey);
     }
 
     private void initZobristHash(int boardSize) {

@@ -41,14 +41,17 @@ public class SGFGameViewer {
     private ListIterator<SGFTree> mTrees;
     private ListIterator<SGFLeaf> mLeaves;
 
+    private static final int TRANSFORM_NORMAL = 0;
+    private static final int TRANSFORM_MIRRORH = TRANSFORM_NORMAL + 1; // 水平镜像
+    private static final int TRANSFORM_MIRRORV = TRANSFORM_MIRRORH + 1; // 垂直镜像
+    private static final int TRANSFORM_ROTATE90 = TRANSFORM_MIRRORV + 1; // 顺时针旋转90度
+    private static final int TRANSFORM_ROTATE180 = TRANSFORM_ROTATE90 + 1; // 顺时针旋转180度
+    private static final int TRANSFORM_ROTATE270 = TRANSFORM_ROTATE180 + 1; // 顺时针旋转270度
+    private static final int TRANSFORM_MAX = TRANSFORM_ROTATE270 + 1;
+
     private byte[] mBoard;
     private Game mGame; // 正向棋盘
-    private ZobristHash mHash;
-    private ZobristHash mMirrorVHash; // 垂直镜像的Hash
-    private ZobristHash mMirrorHHash; // 水平镜像的Hash
-    private ZobristHash mRotate90Hash; // 顺时针旋转90度的Hash
-    private ZobristHash mRotate180Hash; // 顺时针旋转180度的Hash
-    private ZobristHash mRotate270Hash; // 顺时针旋转270度的Hash
+    private ZobristHash[] mHashes = new ZobristHash[TRANSFORM_ROTATE270 + 1];
 
     private int mBoardSize = 19;
 
@@ -57,12 +60,16 @@ public class SGFGameViewer {
     public SGFGameViewer(SGFGame game, ZobristHash hash, OpeningBook book) {
         mBoard = new byte[mBoardSize * mBoardSize];
         mGame = new Game(mBoardSize);
-        mHash = hash;
-        mMirrorVHash = new ZobristHash(hash.getBoardSize(), hash.getPassHash(), hash.getBoardHashTable());
-        mMirrorHHash = new ZobristHash(hash.getBoardSize(), hash.getPassHash(), hash.getBoardHashTable());
-        mRotate90Hash = new ZobristHash(hash.getBoardSize(), hash.getPassHash(), hash.getBoardHashTable());
-        mRotate180Hash = new ZobristHash(hash.getBoardSize(), hash.getPassHash(), hash.getBoardHashTable());
-        mRotate270Hash = new ZobristHash(hash.getBoardSize(), hash.getPassHash(), hash.getBoardHashTable());
+        mHashes[TRANSFORM_NORMAL] = hash;
+        try {
+            mHashes[TRANSFORM_MIRRORH] = hash.clone();
+            mHashes[TRANSFORM_MIRRORV] = hash.clone();
+            mHashes[TRANSFORM_ROTATE90] = hash.clone();
+            mHashes[TRANSFORM_ROTATE180] = hash.clone();
+            mHashes[TRANSFORM_ROTATE270] = hash.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
         mOpeningBook = book;
         mSGFTree = game.getTree();
     }
@@ -181,7 +188,7 @@ public class SGFGameViewer {
     }
 
     private void updateOpeningBook(ListIterator<SGFTree> trees, ListIterator<SGFLeaf> leaves) {
-        long hash = mHash.getKey().getKey();
+        long hash = mHashes[TRANSFORM_NORMAL].getKey().getKey();
         boolean findMove = false;
         boolean findComment = false;
         MoveToken moveToken = null;
@@ -344,13 +351,18 @@ public class SGFGameViewer {
     }
 
     private void applyPassingMove() {
-        mHash.applyPassingMove();
-        // TODO 各方向Hash
+        for (ZobristHash hash : mHashes) {
+            hash.applyPassingMove();
+        }
     }
 
     private void applyMove(int x, int y, int state) {
-        mHash.applyMove(x, y, state);
-        // TODO 各方向Hash
+        mHashes[TRANSFORM_NORMAL].applyMove(x, y, state);
+        mHashes[TRANSFORM_MIRRORH].applyMove(mBoardSize - 1 - x, y, state);
+        mHashes[TRANSFORM_MIRRORV].applyMove(x, mBoardSize - 1 - y, state);
+        mHashes[TRANSFORM_ROTATE90].applyMove(y, x, state);
+        mHashes[TRANSFORM_ROTATE180].applyMove(mBoardSize - 1 - x, mBoardSize - 1 - y, state);
+        mHashes[TRANSFORM_ROTATE270].applyMove(mBoardSize - 1 - y, mBoardSize - 1 - x, state);
     }
 
     /**
@@ -623,25 +635,72 @@ public class SGFGameViewer {
         return true;
     }
 
-    private void printBoard(byte[] board) {
-        long hash = mHash.getKey().getKey();
-        List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
+    private List<Point> findForecastsPoints(int transform) {
+        long hash = mHashes[transform].getKey().getKey();
         List<Point> forecastsPoints = new ArrayList<>();
+        List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
         if (forecasts != null) {
             for (OpeningBook.Forecast forecast : forecasts) {
                 short position = forecast.getPosition();
-                int x = position % mBoardSize;
-                int y = position / mBoardSize;
-                Log.e("SGFGameViewer", "手数:" + mGame.getCurrentMoveNumber()
-                        + " 局面Hash:" + hash
-                        + " 下一手:" + " -> (" + x + "," + y + ")"
-                        + " " + forecast.getInfo());
-                forecastsPoints.add(new Point((byte) x, (byte) y));
+                int x = -1;
+                int y = -1;
+                switch (transform) {
+                    case TRANSFORM_NORMAL:
+                        x = position % mBoardSize;
+                        y = position / mBoardSize;
+                        break;
+                    case TRANSFORM_MIRRORH:
+                        x = mBoardSize - 1 - position % mBoardSize;
+                        y = position / mBoardSize;
+                        break;
+                    case TRANSFORM_MIRRORV:
+                        x = position % mBoardSize;
+                        y = mBoardSize - 1 - position / mBoardSize;
+                        break;
+                    case TRANSFORM_ROTATE90:
+                        x = position / mBoardSize;
+                        y = position % mBoardSize;
+                        break;
+                    case TRANSFORM_ROTATE180:
+                        x = mBoardSize - 1 - position % mBoardSize;
+                        y = mBoardSize - 1 - position / mBoardSize;
+                        break;
+                    case TRANSFORM_ROTATE270:
+                        x = mBoardSize - 1 - position / mBoardSize;
+                        y = mBoardSize - 1 - position % mBoardSize;
+                        break;
+                }
+                if (x != -1 && y != -1) {
+                    System.err.println("变换:" + transform + " 下一手:" + "(" + x + "," + y + ")" + " 信息:" + forecast.getInfo());
+                    forecastsPoints.add(new Point((byte) x, (byte) y));
+                }
+            }
+        }
+        return forecastsPoints;
+    }
+
+    private void printBoard(byte[] board) {
+        // 预测点列表
+        List<Point> forecastsPoints = new ArrayList<>();
+        int transform = TRANSFORM_NORMAL;
+        while (forecastsPoints.isEmpty()) {
+            forecastsPoints.addAll(findForecastsPoints(transform));
+            transform++;
+            if (transform >= TRANSFORM_MAX) {
+                break;
             }
         }
 
+        // 分支点列表
         List<Point> branchesPoints = getBranchesPoints();
-        System.err.println("Board:" + hash);
+
+        System.err.println("Hash(" + mHashes[TRANSFORM_NORMAL].getKey()
+                + " MH:" + mHashes[TRANSFORM_MIRRORH].getKey()
+                + " MV:" + mHashes[TRANSFORM_MIRRORV].getKey()
+                + " R90:" + mHashes[TRANSFORM_ROTATE90].getKey()
+                + " R180:" + mHashes[TRANSFORM_ROTATE180].getKey()
+                + " R270:" + mHashes[TRANSFORM_ROTATE270].getKey() + ")");
+        System.err.println("Board(手数:" + mGame.getCurrentMoveNumber() + " 预测:" + forecastsPoints.size() + " 分支:" + branchesPoints.size() + ")");
         System.err.print(" |-");
         for (int i = 0; i < mBoardSize; i++) {
             System.err.print("--");
