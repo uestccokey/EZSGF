@@ -20,7 +20,7 @@ public class Test {
         try {
             long time = System.currentTimeMillis();
 
-            SGFGame game = loader.load(new FileInputStream(new File("/Users/like/SGF/app/src/main/res/raw/book1485.sgf")));
+            SGFGame game = loader.load(new FileInputStream(new File("/Users/like/SGF/app/src/main/res/raw/book237.sgf")));
             System.out.println("Load SGF UseTime:" + (System.currentTimeMillis() - time));
             time = System.currentTimeMillis();
 
@@ -28,7 +28,7 @@ public class Test {
             System.out.println("Load Hash UseTime:" + (System.currentTimeMillis() - time));
             time = System.currentTimeMillis();
 
-            OpeningBook book = OpeningBookHelper.create(new File("/Users/like/SGF/app/src/main/res/raw/opening_book.ob"));
+            OpeningBook book = OpeningBookHelper.create(new File("/Users/like/SGF/app/src/main/res/raw/opening_book_237.ob"));
             System.out.println("Load Book UseTime:" + (System.currentTimeMillis() - time));
             time = System.currentTimeMillis();
 

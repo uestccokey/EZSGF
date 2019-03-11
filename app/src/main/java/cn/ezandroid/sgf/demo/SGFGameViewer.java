@@ -20,6 +20,7 @@ import cn.ezandroid.lib.sgf.tokens.AddBlackToken;
 import cn.ezandroid.lib.sgf.tokens.AddEmptyToken;
 import cn.ezandroid.lib.sgf.tokens.AddWhiteToken;
 import cn.ezandroid.lib.sgf.tokens.BlackMoveToken;
+import cn.ezandroid.lib.sgf.tokens.CommentToken;
 import cn.ezandroid.lib.sgf.tokens.MoveToken;
 import cn.ezandroid.lib.sgf.tokens.PlacementListToken;
 import cn.ezandroid.lib.sgf.tokens.SGFToken;
@@ -42,8 +43,13 @@ public class SGFGameViewer {
     private ListIterator<SGFLeaf> mLeaves;
 
     private byte[] mBoard;
-    private Game mGame;
+    private Game mGame; // 正向棋盘
     private ZobristHash mHash;
+    private ZobristHash mMirrorVHash; // 垂直镜像的Hash
+    private ZobristHash mMirrorHHash; // 水平镜像的Hash
+    private ZobristHash mRotate90Hash; // 顺时针旋转90度的Hash
+    private ZobristHash mRotate180Hash; // 顺时针旋转180度的Hash
+    private ZobristHash mRotate270Hash; // 顺时针旋转270度的Hash
 
     private int mBoardSize = 19;
 
@@ -53,6 +59,11 @@ public class SGFGameViewer {
         mBoard = new byte[mBoardSize * mBoardSize];
         mGame = new Game(mBoardSize);
         mHash = hash;
+        mMirrorVHash = new ZobristHash(hash.getBoardSize(), hash.getPassHash(), hash.getBoardHashTable());
+        mMirrorHHash = new ZobristHash(hash.getBoardSize(), hash.getPassHash(), hash.getBoardHashTable());
+        mRotate90Hash = new ZobristHash(hash.getBoardSize(), hash.getPassHash(), hash.getBoardHashTable());
+        mRotate180Hash = new ZobristHash(hash.getBoardSize(), hash.getPassHash(), hash.getBoardHashTable());
+        mRotate270Hash = new ZobristHash(hash.getBoardSize(), hash.getPassHash(), hash.getBoardHashTable());
         mOpeningBook = book;
         mSGFTree = game.getTree();
     }
@@ -173,6 +184,9 @@ public class SGFGameViewer {
     private void updateOpeningBook(ListIterator<SGFTree> trees, ListIterator<SGFLeaf> leaves) {
         long hash = mHash.getKey().getKey();
         boolean findMove = false;
+        boolean findComment = false;
+        MoveToken moveToken = null;
+        CommentToken commentToken = null;
         while (leaves.hasNext()) {
             // 使用下一步棋作为对于当前局面的预测记录到开局库中
             SGFLeaf leaf = leaves.next();
@@ -180,33 +194,40 @@ public class SGFGameViewer {
             while (tokens.hasNext()) {
                 SGFToken token = tokens.next();
                 if (token instanceof MoveToken) {
-                    Iterator<Point> points = ((PlacementListToken) token).getPoints();
-                    if (points.hasNext()) {
-                        Point point = points.next();
-                        int position = (point.x - 1) + mBoardSize * (point.y - 1);
-                        String info = ""; // TODO 暂时为空
-                        OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, info);
-                        List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
-                        if (forecasts != null) {
-                            if (forecasts.contains(forecast)) {
-                                forecasts.get(forecasts.indexOf(forecast)).appendInfo(forecast.getInfo());
-                            } else {
-                                mOpeningBook.add(hash, forecast);
-                            }
-                        } else {
-                            mOpeningBook.add(hash, forecast);
-                        }
-                        System.out.println(mOpeningBook.size() + ":" + hash + "->(" + (point.x - 1) + ", " + (point.y - 1) + ")" + token);
-                        findMove = true;
-                        break;
-                    }
+                    moveToken = (MoveToken) token;
+                    findMove = true;
+                } else if (token instanceof CommentToken) {
+                    commentToken = (CommentToken) token;
+                    findComment = true;
+                }
+                if (findMove && findComment) {
+                    break;
                 }
             }
             if (findMove) {
                 break;
             }
         }
-        if (!findMove) {
+        if (findMove) {
+            String comment = commentToken != null ? commentToken.getComment() : "";
+            Iterator<Point> points = moveToken.getPoints();
+            if (points.hasNext()) {
+                Point point = points.next();
+                int position = (point.x - 1) + mBoardSize * (point.y - 1);
+                OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, comment);
+                List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
+                if (forecasts != null) {
+                    if (forecasts.contains(forecast)) {
+                        forecasts.get(forecasts.indexOf(forecast)).appendInfo(forecast.getInfo());
+                    } else {
+                        mOpeningBook.add(hash, forecast);
+                    }
+                } else {
+                    mOpeningBook.add(hash, forecast);
+                }
+                System.out.println(mOpeningBook.size() + ":" + hash + "->(" + (point.x - 1) + ", " + (point.y - 1) + ")" + moveToken + " " + comment);
+            }
+        } else {
             while (trees.hasNext()) {
                 // 有下一级进入下一级
                 SGFTree nextTree = trees.next();
@@ -323,6 +344,16 @@ public class SGFGameViewer {
         return switchable;
     }
 
+    private void applyPassingMove() {
+        mHash.applyPassingMove();
+        // TODO 各方向Hash
+    }
+
+    private void applyMove(int x, int y, int state) {
+        mHash.applyMove(x, y, state);
+        // TODO 各方向Hash
+    }
+
     /**
      * 获取指定位置的状态序号
      *
@@ -359,15 +390,18 @@ public class SGFGameViewer {
                     if (pair != null) {
                         Move move = pair.first;
                         if (((MoveToken) token).isPass(mBoardSize)) {
-                            mHash.applyPassingMove();
+//                            mHash.applyPassingMove();
+                            applyPassingMove();
                         } else {
-                            mHash.applyMove(x, y, getStateIndex(index));
+//                            mHash.applyMove(x, y, getStateIndex(index));
+                            applyMove(x, y, getStateIndex(index));
                             mBoard[index] = EMPTY;
                             Set<Chain> chains = move.getCaptured();
                             for (Chain chain : chains) {
                                 for (Stone stone : chain.getStones()) {
                                     int i = stone.intersection.x + mBoardSize * stone.intersection.y;
-                                    mHash.applyMove(stone.intersection.x, stone.intersection.y, getStateIndex(i));
+//                                    mHash.applyMove(stone.intersection.x, stone.intersection.y, getStateIndex(i));
+                                    applyMove(stone.intersection.x, stone.intersection.y, getStateIndex(i));
                                     mBoard[i] = (stone.color == StoneColor.BLACK) ? BLACK : WHITE;
                                 }
                             }
@@ -379,7 +413,8 @@ public class SGFGameViewer {
                     stone.color = StoneColor.BLACK;
                     mGame.forceRemoveStone(stone);
 
-                    mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
+//                    mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
+                    applyMove(x, y, ZobristHash.STATE_BLACK);
                     mBoard[index] = EMPTY;
                 } else if (token instanceof AddWhiteToken) {
                     Stone stone = new Stone();
@@ -387,7 +422,8 @@ public class SGFGameViewer {
                     stone.color = StoneColor.WHITE;
                     mGame.forceRemoveStone(stone);
 
-                    mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
+//                    mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
+                    applyMove(x, y, ZobristHash.STATE_WHITE);
                     mBoard[index] = EMPTY;
                 } else if (token instanceof AddEmptyToken) {
                     MoveToken original = ((AddEmptyToken) token).getChange(new Point((byte) (x + 1), (byte) (y + 1)));
@@ -398,7 +434,8 @@ public class SGFGameViewer {
                             stone.color = StoneColor.BLACK;
                             mGame.forceAddStone(stone);
 
-                            mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
+//                            mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
+                            applyMove(x, y, ZobristHash.STATE_BLACK);
                             mBoard[index] = BLACK;
                         } else {
                             Stone stone = new Stone();
@@ -406,7 +443,8 @@ public class SGFGameViewer {
                             stone.color = StoneColor.WHITE;
                             mGame.forceAddStone(stone);
 
-                            mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
+//                            mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
+                            applyMove(x, y, ZobristHash.STATE_WHITE);
                             mBoard[index] = WHITE;
                         }
                     }
@@ -460,15 +498,18 @@ public class SGFGameViewer {
                     Move move = mGame.redo();
                     if (move != null) {
                         if (((MoveToken) token).isPass(mBoardSize)) {
-                            mHash.applyPassingMove();
+//                            mHash.applyPassingMove();
+                            applyPassingMove();
                         } else {
                             mBoard[index] = ((MoveToken) token).isBlack() ? BLACK : WHITE;
-                            mHash.applyMove(x, y, getStateIndex(index));
+//                            mHash.applyMove(x, y, getStateIndex(index));
+                            applyMove(x, y, getStateIndex(index));
                             Set<Chain> chains = move.getCaptured();
                             for (Chain chain : chains) {
                                 for (Stone stone : chain.getStones()) {
                                     int i = stone.intersection.x + mBoardSize * stone.intersection.y;
-                                    mHash.applyMove(stone.intersection.x, stone.intersection.y, getStateIndex(i));
+//                                    mHash.applyMove(stone.intersection.x, stone.intersection.y, getStateIndex(i));
+                                    applyMove(stone.intersection.x, stone.intersection.y, getStateIndex(i));
                                     mBoard[i] = EMPTY;
                                 }
                             }
@@ -479,7 +520,8 @@ public class SGFGameViewer {
                             stone.color = ((MoveToken) token).isBlack() ? StoneColor.BLACK : StoneColor.WHITE;
                             mGame.addPassStone(stone);
 
-                            mHash.applyPassingMove();
+//                            mHash.applyPassingMove();
+                            applyPassingMove();
                         } else {
                             HashSet<Chain> chains = new HashSet<>();
                             Stone stone = new Stone();
@@ -488,11 +530,13 @@ public class SGFGameViewer {
                             mGame.addStone(stone, chains);
 
                             mBoard[index] = ((MoveToken) token).isBlack() ? BLACK : WHITE;
-                            mHash.applyMove(x, y, getStateIndex(index));
+//                            mHash.applyMove(x, y, getStateIndex(index));
+                            applyMove(x, y, getStateIndex(index));
                             for (Chain chain : chains) {
                                 for (Stone s : chain.getStones()) {
                                     int i = s.intersection.x + mBoardSize * s.intersection.y;
-                                    mHash.applyMove(s.intersection.x, s.intersection.y, getStateIndex(i));
+//                                    mHash.applyMove(s.intersection.x, s.intersection.y, getStateIndex(i));
+                                    applyMove(s.intersection.x, s.intersection.y, getStateIndex(i));
                                     mBoard[i] = EMPTY;
                                 }
                             }
@@ -505,7 +549,8 @@ public class SGFGameViewer {
                     mGame.forceAddStone(stone);
 
                     mBoard[index] = BLACK;
-                    mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
+//                    mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
+                    applyMove(x, y, ZobristHash.STATE_BLACK);
                 } else if (token instanceof AddWhiteToken) {
                     Stone stone = new Stone();
                     stone.intersection = new Intersection(x, y);
@@ -513,7 +558,8 @@ public class SGFGameViewer {
                     mGame.forceAddStone(stone);
 
                     mBoard[index] = WHITE;
-                    mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
+//                    mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
+                    applyMove(x, y, ZobristHash.STATE_WHITE);
                 } else if (token instanceof AddEmptyToken) {
                     switch (mBoard[index]) {
                         case BLACK: {
@@ -522,7 +568,8 @@ public class SGFGameViewer {
                             stone.color = StoneColor.BLACK;
                             mGame.forceRemoveStone(stone);
 
-                            mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
+//                            mHash.applyMove(x, y, ZobristHash.STATE_BLACK);
+                            applyMove(x, y, ZobristHash.STATE_BLACK);
                             mBoard[index] = EMPTY;
 
                             MoveToken moveToken = new BlackMoveToken();
@@ -537,7 +584,8 @@ public class SGFGameViewer {
                             stone.color = StoneColor.WHITE;
                             mGame.forceRemoveStone(stone);
 
-                            mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
+//                            mHash.applyMove(x, y, ZobristHash.STATE_WHITE);
+                            applyMove(x, y, ZobristHash.STATE_WHITE);
                             mBoard[index] = EMPTY;
 
                             MoveToken moveToken = new WhiteMoveToken();
