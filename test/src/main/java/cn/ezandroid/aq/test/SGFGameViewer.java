@@ -232,6 +232,7 @@ public class SGFGameViewer {
                     mOpeningBook.add(hash, forecast);
                 }
                 System.err.println(mOpeningBook.size() + ":" + hash + "->(" + (point.x - 1) + ", " + (point.y - 1) + ")" + moveToken + " " + comment);
+                printBoard(mBoard);
             }
         } else {
             while (trees.hasNext()) {
@@ -357,7 +358,11 @@ public class SGFGameViewer {
     }
 
     private void applyMove(int x, int y, int state) {
+        Log.e("SGFGameViewer",
+                mHashes[0].getKey() + " applyMove (" + x + "," + y + ") " + state);
         mHashes[TRANSFORM_NORMAL].applyMove(x, y, state);
+        Log.e("SGFGameViewer",
+                mHashes[TRANSFORM_NORMAL].getKey() + "");
         mHashes[TRANSFORM_MIRRORH].applyMove(mBoardSize - 1 - x, y, state);
         mHashes[TRANSFORM_MIRRORV].applyMove(x, mBoardSize - 1 - y, state);
         mHashes[TRANSFORM_ROTATE90].applyMove(y, x, state);

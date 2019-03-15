@@ -254,6 +254,7 @@ public class SGFLoader {
                     // Since we found a token that belongs to the "information"
                     // class, it gets a special place in habitat.
                     //
+//                    Log.e("SGFLoader", "readToken:" + sgfToken);
                     if (sgfToken instanceof InfoToken)
                         mGameInfoTokens.add(sgfToken);
                     else {
