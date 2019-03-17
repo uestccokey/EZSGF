@@ -97,16 +97,21 @@ public class MoveTreeView extends RecyclerView {
             for (int i = 0; i < size; i++) {
                 View view = array.valueAt(i);
                 if (view instanceof TreeStone) {
-                    int no = ((TreeStone) view).getNode().getMoveNo();
-                    if (col < no) {
-                        col = no;
+                    int nodeNo = ((TreeStone) view).getNode().getNodeNo();
+//                    int moveNo = ((TreeStone) view).getNode().getMoveNo();
+                    if (col < nodeNo) {
+                        col = nodeNo;
                     }
+//                    if (col < moveNo) {
+//                        col = moveNo;
+//                    }
                 }
             }
             if (mColSize < col) {
                 mColSize = col;
             }
         }
+        mColSize++; // FIXME
         mRowSize = mElements.size();
         mCount = mRowSize * mColSize;
 

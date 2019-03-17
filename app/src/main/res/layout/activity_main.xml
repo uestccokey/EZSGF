@@ -23,9 +23,14 @@
         android:layout_alignParentRight="true"
         android:text="Redo" />
 
-    <cn.ezandroid.sgf.demo.view.MoveTreeView
-        android:id="@+id/tree"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/var" />
+        android:layout_height="match_parent"
+        android:layout_below="@id/var">
+
+        <cn.ezandroid.sgf.demo.view.MoveTreeView
+            android:id="@+id/tree"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </ScrollView>
 </RelativeLayout>

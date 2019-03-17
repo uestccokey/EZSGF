@@ -1,12 +1,11 @@
 package cn.ezandroid.lib.sgf;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 
@@ -30,13 +29,14 @@ public class Sgf {
     }
 
     public static SgfGame createFromInputStream(InputStream in) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8").newDecoder()))) {
-            StringBuilder out = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                out.append(line);
+        try {
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = in.read(buffer)) != -1) {
+                result.write(buffer, 0, length);
             }
-            Sgf rtrn = new Sgf(out.toString());
+            Sgf rtrn = new Sgf(result.toString("UTF-8"));
             return rtrn.getGame();
         } catch (IOException e) {
             throw new RuntimeException(e);
