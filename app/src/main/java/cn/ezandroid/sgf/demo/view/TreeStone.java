@@ -17,7 +17,7 @@ import cn.ezandroid.lib.sgf.parser.GameNode;
  * @author like
  * @date 2019-03-15
  */
-public class TreeStone extends View implements MoveTreeElement {
+public class TreeStone extends View {
 
     private StoneState mSquareState;
 
@@ -51,9 +51,10 @@ public class TreeStone extends View implements MoveTreeElement {
         }
 
         this.mNode = node;
+    }
 
-        if (node.getProperty("C") != null) {
-        }
+    public GameNode getNode() {
+        return mNode;
     }
 
     public static TreeStone create(Context context, GameNode node) {
@@ -83,7 +84,7 @@ public class TreeStone extends View implements MoveTreeElement {
         if (mPaint == null) {
             mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         }
-        float circleRadius = width * 3f / 8;
+        float circleRadius = width * 2f / 5;
         switch (mSquareState) {
             case WHITE:
                 mPaint.setColor(Color.WHITE);
@@ -116,11 +117,22 @@ public class TreeStone extends View implements MoveTreeElement {
                 break;
         }
         String no = String.valueOf(mNode.getMoveNo());
-        float textSize = width / 2f;
+        float textSize;
+        if (no.length() <= 1) {
+            textSize = width / 2f;
+        } else if (no.length() <= 2) {
+            textSize = width / 2.25f;
+        } else {
+            textSize = width / 2.5f;
+        }
         mPaint.setTextSize(textSize);
         float textWidth = mPaint.measureText(no);
         Rect textRect = new Rect();
         mPaint.getTextBounds(no, 0, no.length(), textRect);
         canvas.drawText(no, (width - textWidth) / 2f, (height + textRect.height()) / 2f, mPaint);
+        if (mNode.getProperty("C") != null) {
+            mPaint.setColor(Color.BLACK);
+            canvas.drawLine(0, height, width, height, mPaint);
+        }
     }
 }

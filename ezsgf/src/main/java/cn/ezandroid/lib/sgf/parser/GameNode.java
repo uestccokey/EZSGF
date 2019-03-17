@@ -300,7 +300,7 @@ public class GameNode implements Comparable<GameNode>, Cloneable {
 
     @Override
     public String toString() {
-        return "Props: keys=" + mProperties.keySet().toString() + " all=" + mProperties.toString() + " moveNo: " + mMoveNo + " children: " + mChildren.size() + " vdepth: " + mVisualDepth + " parentNode: " + getParentNode().hashCode();
+        return "GameNode:" + mProperties.toString() + " MoveNo:" + mMoveNo + " Children:" + mChildren.size() + " Depth:" + mVisualDepth;
     }
 
     @Override

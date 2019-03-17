@@ -13,7 +13,7 @@ import android.view.View;
  * @author like
  * @date 2019-03-16
  */
-public class GlueStone extends View implements MoveTreeElement {
+public class GlueStone extends View {
 
     private GlueStoneType mType;
     private Paint mPaint;

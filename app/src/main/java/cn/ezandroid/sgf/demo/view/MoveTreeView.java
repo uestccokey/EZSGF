@@ -93,12 +93,24 @@ public class MoveTreeView extends RecyclerView {
 
         for (SparseArray<View> array : mElements) {
             int size = array.size();
-            if (mColSize < size) {
-                mColSize = size;
+            int col = size;
+            for (int i = 0; i < size; i++) {
+                View view = array.valueAt(i);
+                if (view instanceof TreeStone) {
+                    int no = ((TreeStone) view).getNode().getMoveNo();
+                    if (col < no) {
+                        col = no;
+                    }
+                }
+            }
+            if (mColSize < col) {
+                mColSize = col;
             }
         }
         mRowSize = mElements.size();
         mCount = mRowSize * mColSize;
+
+        Log.e("MoveTreeView", "bindSgfGame:" + mRowSize + "x" + mColSize);
 
         post(() -> {
             setLayoutManager(new GridLayoutManager(getContext(), mRowSize, GridLayoutManager.HORIZONTAL, false));
@@ -117,6 +129,9 @@ public class MoveTreeView extends RecyclerView {
             } else {
                 Log.e("MoveTreeView", "Add TreeStone:" + node.getNodeNo() + " " + node.getVisualDepth());
             }
+            treeStone.setOnClickListener(v -> {
+                Log.e("MoveTreeView", "Click:" + node);
+            });
             addElement(treeStone, node.getNodeNo(), node.getVisualDepth());
         }
 

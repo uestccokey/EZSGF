@@ -16,7 +16,7 @@ import cn.ezandroid.lib.sgf.parser.GameNode;
  * @author like
  * @date 2019-03-15
  */
-public class StartStone extends View implements MoveTreeElement {
+public class StartStone extends View {
 
     private GameNode mNode;
     private Paint mPaint;
@@ -33,6 +33,10 @@ public class StartStone extends View implements MoveTreeElement {
         mNode = node;
     }
 
+    public GameNode getNode() {
+        return mNode;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -41,7 +45,7 @@ public class StartStone extends View implements MoveTreeElement {
         if (mPaint == null) {
             mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         }
-        float circleRadius = width * 3f / 8;
+        float circleRadius = width * 2f / 5;
         mPaint.setColor(Color.YELLOW);
         mPaint.setStyle(Paint.Style.FILL);
         canvas.drawCircle(width / 2f, height / 2f, circleRadius, mPaint);
