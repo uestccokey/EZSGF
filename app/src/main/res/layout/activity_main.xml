@@ -22,4 +22,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:text="Redo" />
+
+    <cn.ezandroid.sgf.demo.view.MoveTreeView
+        android:id="@+id/tree"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/var" />
 </RelativeLayout>
