@@ -1,1 +1,1 @@
-include ':app', ':ezsgf', ':test'
+include ':app', ':ezsgf', ':OpeningBook'
