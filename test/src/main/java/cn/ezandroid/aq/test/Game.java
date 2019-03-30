@@ -214,6 +214,20 @@ public class Game implements Cloneable, Serializable {
     }
 
     /**
+     * 获取该点的棋子颜色，若该点没有棋子，则返回空
+     *
+     * @param intersection
+     * @return
+     */
+    public StoneColor color(Intersection intersection) {
+        Chain chain = mFilled.get(intersection);
+        if (chain == null) {
+            return null;
+        }
+        return chain.getStoneColor();
+    }
+
+    /**
      * 是否能撤销
      */
     public boolean hasPast() {
