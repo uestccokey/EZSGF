@@ -37,26 +37,23 @@ public class OpeningBook implements Serializable {
         private static final long serialVersionUID = 42L;
 
         private short mPosition;
-        private StringBuilder mInfo = new StringBuilder();
+        private float mValue;
 
-        public Forecast(short position, String info) {
+        public Forecast(short position, float value) {
             mPosition = position;
-            mInfo.append(info);
+            mValue = value;
         }
 
         public short getPosition() {
             return mPosition;
         }
 
-        public String getInfo() {
-            return mInfo.toString();
+        public float getValue() {
+            return mValue;
         }
 
-        public void appendInfo(String info) {
-            if (!mInfo.toString().contains(info)) {
-                mInfo.append("\n");
-                mInfo.append(info);
-            }
+        public void setValue(float value) {
+            mValue = value;
         }
 
         @Override

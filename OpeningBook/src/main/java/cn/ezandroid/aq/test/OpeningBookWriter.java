@@ -3,9 +3,11 @@ package cn.ezandroid.aq.test;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import cn.ezandroid.aq.android.Environment;
 import cn.ezandroid.aq.android.Log;
+import cn.ezandroid.aq.android.TextUtils;
 import cn.ezandroid.lib.sgf.SgfGame;
 import cn.ezandroid.lib.sgf.SgfNode;
 
@@ -40,6 +42,11 @@ public class OpeningBookWriter {
         Log.e("OpeningBookWriter", hash.getKey() + "");
     }
 
+    public static boolean isDoubleOrFloat(String str) {
+        Pattern pattern = Pattern.compile("^[-+]?[.\\d]*$");
+        return pattern.matcher(str).matches();
+    }
+
     private void addOpenBook(SgfNode node, Game game, ZobristHash zobristHash) throws CloneNotSupportedException {
         long hash = zobristHash.getKey().getKey();
         if (node.hasChildren()) {
@@ -67,18 +74,29 @@ public class OpeningBookWriter {
                     }
 
                     int position = cNode.getCoords()[0] + mBoardSize * cNode.getCoords()[1];
-                    OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, cNode.getSgfComment());
-                    List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
-                    if (forecasts != null) {
-                        if (forecasts.contains(forecast)) {
-                            forecasts.get(forecasts.indexOf(forecast)).appendInfo(forecast.getInfo());
-                        } else {
-                            mOpeningBook.add(hash, forecast);
+                    String comment = cNode.getSgfComment();
+                    if (!TextUtils.isEmpty(comment)) {
+                        String[] infoSplits = comment.split("\n");
+                        if (infoSplits.length > 0) {
+                            String blackWinStr = infoSplits[0];
+                            if (isDoubleOrFloat(blackWinStr)) {
+                                float blackWin = Float.parseFloat(blackWinStr);
+                                OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, blackWin);
+                                List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
+                                if (forecasts != null) {
+                                    if (!forecasts.contains(forecast)) {
+                                        mOpeningBook.add(hash, forecast);
+                                    } else {
+                                        // TODO
+                                    }
+                                } else {
+                                    mOpeningBook.add(hash, forecast);
+                                }
+                                Log.e("OpeningBookWriter",
+                                        hash + " 开局库:" + mOpeningBook.size() + " " + cNode.getCoords()[0] + "x" + cNode.getCoords()[1]);
+                            }
                         }
-                    } else {
-                        mOpeningBook.add(hash, forecast);
                     }
-                    Log.e("OpeningBookWriter", hash + " 开局库:" + mOpeningBook.size() + " " + cNode.getCoords()[0] + "x" + cNode.getCoords()[1]);
                 } else {
                     applyPassingMove(zobristHash1);
                 }
@@ -109,18 +127,29 @@ public class OpeningBookWriter {
                 }
 
                 int position = nextNode.getCoords()[0] + mBoardSize * nextNode.getCoords()[1];
-                OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, nextNode.getSgfComment());
-                List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
-                if (forecasts != null) {
-                    if (forecasts.contains(forecast)) {
-                        forecasts.get(forecasts.indexOf(forecast)).appendInfo(forecast.getInfo());
-                    } else {
-                        mOpeningBook.add(hash, forecast);
+                String comment = nextNode.getSgfComment();
+                if (!TextUtils.isEmpty(comment)) {
+                    String[] infoSplits = comment.split("\n");
+                    if (infoSplits.length > 0) {
+                        String blackWinStr = infoSplits[0];
+                        if (isDoubleOrFloat(blackWinStr)) {
+                            float blackWin = Float.parseFloat(blackWinStr);
+                            OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, blackWin);
+                            List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
+                            if (forecasts != null) {
+                                if (!forecasts.contains(forecast)) {
+                                    mOpeningBook.add(hash, forecast);
+                                } else {
+                                    // TODO
+                                }
+                            } else {
+                                mOpeningBook.add(hash, forecast);
+                            }
+                            Log.e("OpeningBookWriter",
+                                    hash + " 开局库:" + mOpeningBook.size() + " " + nextNode.getCoords()[0] + "x" + nextNode.getCoords()[1]);
+                        }
                     }
-                } else {
-                    mOpeningBook.add(hash, forecast);
                 }
-                Log.e("OpeningBookWriter", hash + " 开局库:" + mOpeningBook.size() + " " + nextNode.getCoords()[0] + "x" + nextNode.getCoords()[1]);
             } else {
                 applyPassingMove(zobristHash);
             }
