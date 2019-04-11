@@ -81,7 +81,7 @@ public class OpeningBookWriter {
                             String blackWinStr = infoSplits[0];
                             if (isDoubleOrFloat(blackWinStr)) {
                                 float blackWin = Float.parseFloat(blackWinStr);
-                                OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, blackWin);
+                                OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, (short) Math.round(blackWin * 100));
                                 List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
                                 if (forecasts != null) {
                                     if (!forecasts.contains(forecast)) {
@@ -134,7 +134,7 @@ public class OpeningBookWriter {
                         String blackWinStr = infoSplits[0];
                         if (isDoubleOrFloat(blackWinStr)) {
                             float blackWin = Float.parseFloat(blackWinStr);
-                            OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, blackWin);
+                            OpeningBook.Forecast forecast = new OpeningBook.Forecast((short) position, (short) Math.round(blackWin * 100));
                             List<OpeningBook.Forecast> forecasts = mOpeningBook.get(hash);
                             if (forecasts != null) {
                                 if (!forecasts.contains(forecast)) {

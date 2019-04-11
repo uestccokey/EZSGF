@@ -37,9 +37,9 @@ public class OpeningBook implements Serializable {
         private static final long serialVersionUID = 42L;
 
         private short mPosition;
-        private float mValue;
+        private short mValue; // 48.92 -> 4892, 48.921 -> 4892, 48.9 -> 4890
 
-        public Forecast(short position, float value) {
+        public Forecast(short position, short value) {
             mPosition = position;
             mValue = value;
         }
@@ -48,12 +48,8 @@ public class OpeningBook implements Serializable {
             return mPosition;
         }
 
-        public float getValue() {
+        public short getValue() {
             return mValue;
-        }
-
-        public void setValue(float value) {
-            mValue = value;
         }
 
         @Override

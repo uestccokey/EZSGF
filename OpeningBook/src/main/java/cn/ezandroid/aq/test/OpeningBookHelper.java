@@ -65,7 +65,7 @@ public class OpeningBookHelper {
                 long hash = dis.readLong();
                 byte forecastSize = dis.readByte();
                 for (int j = 0; j < forecastSize; j++) {
-                    OpeningBook.Forecast forecast = new OpeningBook.Forecast(dis.readShort(), dis.readFloat());
+                    OpeningBook.Forecast forecast = new OpeningBook.Forecast(dis.readShort(), dis.readShort());
                     book.add(hash, forecast);
                 }
             }
@@ -117,7 +117,7 @@ public class OpeningBookHelper {
                 dos.writeByte(forecasts.size()); // 对一个局面的预测落子应该不超过127个
                 for (OpeningBook.Forecast forecast : forecasts) {
                     dos.writeShort(forecast.getPosition());
-                    dos.writeFloat(forecast.getValue());
+                    dos.writeShort(forecast.getValue());
                 }
             }
             dos.flush();
